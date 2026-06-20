@@ -14,6 +14,7 @@
 		// "lib": ["esnext"],
 		// "types": ["node"],
 		// and npm install -D @types/node
+		"ignoreDeprecations": "6.0",
 
 		// Other Outputs
 		"sourceMap": true,
@@ -38,7 +39,9 @@
 		"esModuleInterop": true,
 		"isolatedModules": true,
 		"noUncheckedSideEffectImports": true,
+		"moduleResolution": "node",
 		"moduleDetection": "force",
 		"skipLibCheck": true
-	}
+	},
+	"include": ["src/**/*"]
 }
