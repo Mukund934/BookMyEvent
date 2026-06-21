@@ -12,26 +12,15 @@ import redis from "../config/redis";
 import ApiError from "../utils/ApiError";
 import asyncHandler from "../utils/asyncHandler";
 
+export const createEvent = asyncHandler(
+	async (req: AuthRequest, res: Response) => {
+		if (!req.user) {
+			throw new ApiError(401, "Unauthorized");
+		}
 
-
-export const createEvent = async (
-	req: AuthRequest,
-	res: Response,
-): Promise<void> => {
-	try {
 		const { title, description, date, location, price, totalSeats } =
 			req.body;
 
-		// auth check
-		if (!req.user) {
-			res.status(401).json({
-				success: false,
-				message: "Unauthorized",
-			});
-			return;
-		}
-
-		// validation
 		if (
 			!title ||
 			!description ||
@@ -40,19 +29,11 @@ export const createEvent = async (
 			price == null ||
 			totalSeats == null
 		) {
-			res.status(400).json({
-				success: false,
-				message: "All fields are required",
-			});
-			return;
+			throw new ApiError(400, "All fields are required");
 		}
 
 		if (Number(price) < 0 || Number(totalSeats) <= 0) {
-			res.status(400).json({
-				success: false,
-				message: "Invalid numeric values",
-			});
-			return;
+			throw new ApiError(400, "Invalid numeric values");
 		}
 
 		const event = await Event.create({
@@ -71,20 +52,11 @@ export const createEvent = async (
 			message: "Event created successfully",
 			data: event,
 		});
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({
-			success: false,
-			message: "Internal Server Error",
-		});
-	}
-};
+	},
+);
 
-export const getAllEvents = async (
-	req: Request,
-	res: Response,
-): Promise<void> => {
-	try {
+export const getAllEvents = asyncHandler(
+	async (req: Request, res: Response) => {
 		const page = Math.max(1, Number(req.query.page) || 1);
 		const limit = Math.min(50, Number(req.query.limit) || 10);
 		const skip = (page - 1) * limit;
@@ -94,10 +66,7 @@ export const getAllEvents = async (
 		const filter: any = {};
 
 		if (location && typeof location === "string") {
-			filter.location = {
-				$regex: location,
-				$options: "i",
-			};
+			filter.location = { $regex: location, $options: "i" };
 		}
 
 		if (date && typeof date === "string") {
@@ -106,7 +75,6 @@ export const getAllEvents = async (
 
 		const [events, total] = await Promise.all([
 			Event.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
-
 			Event.countDocuments(filter),
 		]);
 
@@ -122,102 +90,54 @@ export const getAllEvents = async (
 				},
 			},
 		});
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({
-			success: false,
-			message: "Server error",
-		});
-	}
-};
+	},
+);
 
-export const getEventById = async (
-	req: Request,
-	res: Response,
-): Promise<void> => {
-	try {
+export const getEventById = asyncHandler(
+	async (req: Request, res: Response) => {
 		const id = validateObjectId(req.params.id);
 
-		if (!id) {
-			res.status(400).json({
-				success: false,
-				message: "Invalid event id",
-			});
-			return;
-		}
+		if (!id) throw new ApiError(400, "Invalid event id");
 
 		const event = await Event.findById(id).populate(
 			"organizer",
 			"name email",
 		);
 
-		if (!event) {
-			res.status(404).json({
-				success: false,
-				message: "Event not found",
-			});
-			return;
-		}
+		if (!event) throw new ApiError(404, "Event not found");
 
 		res.status(200).json({
 			success: true,
 			data: event,
 		});
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({
-			success: false,
-			message: "Server error",
-		});
-	}
-};
-
-export const getEventAnalytics = async (
-	req: Request,
-	res: Response,
-): Promise<void> => {
-	try {
+	},
+);
+export const getEventAnalytics = asyncHandler(
+	async (req: Request, res: Response) => {
 		const rawId = req.params.id;
 
 		if (!rawId || Array.isArray(rawId)) {
-			res.status(400).json({
-				success: false,
-				message: "Event id required",
-			});
-			return;
+			throw new ApiError(400, "Event id required");
 		}
 
 		const id = validateObjectId(rawId);
 
-		if (!id) {
-			res.status(400).json({
-				success: false,
-				message: "Invalid event id",
-			});
-			return;
-		}
+		if (!id) throw new ApiError(400, "Invalid event id");
 
 		const cacheKey = `analytics:${id}`;
 
 		const cached = await redis.get(cacheKey);
 		if (cached) {
-			res.status(200).json({
+			return res.status(200).json({
 				success: true,
 				data: JSON.parse(cached),
 				cached: true,
 			});
-			return;
 		}
 
 		const event = await Event.findById(id);
 
-		if (!event) {
-			res.status(404).json({
-				success: false,
-				message: "Event not found",
-			});
-			return;
-		}
+		if (!event) throw new ApiError(404, "Event not found");
 
 		const stats = await Booking.aggregate([
 			{
@@ -264,8 +184,5 @@ export const getEventAnalytics = async (
 			success: true,
 			data: responseData,
 		});
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ success: false, message: "Server error" });
-	}
-};
+	},
+);

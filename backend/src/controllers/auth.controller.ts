@@ -1,27 +1,25 @@
 import { Request, Response } from "express";
-import bcrypt from "bcryptjs";
 
-import User from "../models/User";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-export const register = async (req: Request, res: Response): Promise<void> => {
-	try {
+import User from "../models/User";
+
+import ApiError from "../utils/ApiError";
+import asyncHandler from "../utils/asyncHandler";
+
+export const register = asyncHandler(
+	async (req: Request, res: Response) => {
 		const { name, email, password } = req.body;
 
 		if (!name || !email || !password) {
-			res.status(400).json({
-				message: "All fields are required",
-			});
-			return;
+			throw new ApiError(400, "All fields are required");
 		}
 
 		const existingUser = await User.findOne({ email });
 
 		if (existingUser) {
-			res.status(400).json({
-				message: "Email already exists",
-			});
-			return;
+			throw new ApiError(400, "Email already exists");
 		}
 
 		const hashedPassword = await bcrypt.hash(password, 10);
@@ -32,53 +30,40 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 			password: hashedPassword,
 		});
 
-		const userResponse = {
-			id: user._id,
-			name: user.name,
-			email: user.email,
-			role: user.role,
-		};
-
 		res.status(201).json({
+			success: true,
 			message: "User registered successfully",
-			user: userResponse,
+			user: {
+				id: user._id,
+				name: user.name,
+				email: user.email,
+				role: user.role,
+			},
 		});
-	} catch (error) {
-		console.error(error);
+	},
+);
 
-		res.status(500).json({
-			message: "Internal Server Error",
-		});
-	}
-};
-
-export const login = async (req: Request, res: Response): Promise<void> => {
-	try {
+export const login = asyncHandler(
+	async (req: Request, res: Response) => {
 		const { email, password } = req.body;
 
 		if (!email || !password) {
-			res.status(400).json({
-				message: "Email and password are required",
-			});
-			return;
+			throw new ApiError(400, "Email and password are required");
 		}
 
 		const user = await User.findOne({ email });
 
 		if (!user) {
-			res.status(401).json({
-				message: "Invalid credentials",
-			});
-			return;
+			throw new ApiError(401, "Invalid credentials");
 		}
 
-		const isPasswordMatch = await bcrypt.compare(password, user.password);
+		const isPasswordMatch = await bcrypt.compare(
+			password,
+			user.password,
+		);
 
 		if (!isPasswordMatch) {
-			res.status(401).json({
-				message: "Invalid credentials",
-			});
-			return;
+			throw new ApiError(401, "Invalid credentials");
 		}
 
 		const token = jwt.sign(
@@ -93,6 +78,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 		);
 
 		res.status(200).json({
+			success: true,
 			message: "Login successful",
 			token,
 			user: {
@@ -102,11 +88,5 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 				role: user.role,
 			},
 		});
-	} catch (error) {
-		console.error(error);
-
-		res.status(500).json({
-			message: "Internal Server Error",
-		});
-	}
-};
+	},
+);
