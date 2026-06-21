@@ -3,197 +3,160 @@ import mongoose from "mongoose";
 
 import Booking from "../models/Booking";
 import { AuthRequest } from "../middleware/auth.middleware";
-import redis from "../config/redis";
+import ApiError from "../utils/ApiError";
+import asyncHandler from "../utils/asyncHandler";
 
-export const getTopEventsByRevenue = async (
-	req: AuthRequest,
-	res: Response,
-): Promise<void> => {
-	try {
-		if (!req.user) {
-			res.status(401).json({ message: "Unauthorized" });
-			return;
-		}
+export const getTopEventsByRevenue = asyncHandler(async (req: AuthRequest, res: Response) => {
 
-		const stats = await Booking.aggregate([
-			{
-				$match: { status: "active" },
-			},
-			{
-				$lookup: {
-					from: "events",
-					localField: "event",
-					foreignField: "_id",
-					as: "event",
-				},
-			},
-			{ $unwind: "$event" },
-			{
-				$match: {
-					"event.organizer": new mongoose.Types.ObjectId(req.user.userId),
-				},
-			},
-			{
-				$group: {
-					_id: "$event._id",
-					title: { $first: "$event.title" },
-					revenue: { $sum: "$totalAmount" },
-					bookings: { $sum: 1 },
-				},
-			},
-			{ $sort: { revenue: -1 } },
-		]);
-
-		res.status(200).json({
-			success: true,
-			data: stats,
-		});
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ message: "Server error" });
+	if (!req.user) {
+		throw new ApiError(401, "Unauthorized");
 	}
-};
 
-export const getMonthlyBookingTrends = async (
-	req: AuthRequest,
-	res: Response,
-): Promise<void> => {
-	try {
-		if (!req.user) {
-			res.status(401).json({ message: "Unauthorized" });
-			return;
-		}
+	const stats = await Booking.aggregate([
+		{ $match: { status: "active" } },
+		{
+			$lookup: {
+				from: "events",
+				localField: "event",
+				foreignField: "_id",
+				as: "event",
+			},
+		},
+		{ $unwind: "$event" },
+		{
+			$match: {
+				"event.organizer": new mongoose.Types.ObjectId(req.user.userId),
+			},
+		},
+		{
+			$group: {
+				_id: "$event._id",
+				title: { $first: "$event.title" },
+				revenue: { $sum: "$totalAmount" },
+				bookings: { $sum: 1 },
+			},
+		},
+		{ $sort: { revenue: -1 } },
+	]);
 
-		const trends = await Booking.aggregate([
-			{
-				$lookup: {
-					from: "events",
-					localField: "event",
-					foreignField: "_id",
-					as: "event",
-				},
-			},
-			{ $unwind: "$event" },
-			{
-				$match: {
-					"event.organizer": new mongoose.Types.ObjectId(req.user.userId),
-				},
-			},
-			{
-				$group: {
-					_id: {
-						year: { $year: "$createdAt" },
-						month: { $month: "$createdAt" },
-					},
-					totalBookings: { $sum: 1 },
-					revenue: { $sum: "$totalAmount" },
-				},
-			},
-			{ $sort: { "_id.year": 1, "_id.month": 1 } },
-		]);
+	res.status(200).json({
+		success: true,
+		data: stats,
+	});
+});
 
-		res.status(200).json({
-			success: true,
-			data: trends,
-		});
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ message: "Server error" });
+export const getMonthlyBookingTrends = asyncHandler(async (req: AuthRequest, res: Response) => {
+
+	if (!req.user) {
+		throw new ApiError(401, "Unauthorized");
 	}
-};
 
-
-
-export const getCancellationStats = async (
-	req: AuthRequest,
-	res: Response,
-): Promise<void> => {
-	try {
-		if (!req.user) {
-			res.status(401).json({ message: "Unauthorized" });
-			return;
-		}
-
-		const stats = await Booking.aggregate([
-			{
-				$lookup: {
-					from: "events",
-					localField: "event",
-					foreignField: "_id",
-					as: "event",
-				},
+	const trends = await Booking.aggregate([
+		{
+			$lookup: {
+				from: "events",
+				localField: "event",
+				foreignField: "_id",
+				as: "event",
 			},
-			{ $unwind: "$event" },
-			{
-				$match: {
-					"event.organizer": new mongoose.Types.ObjectId(req.user.userId),
-				},
+		},
+		{ $unwind: "$event" },
+		{
+			$match: {
+				"event.organizer": new mongoose.Types.ObjectId(req.user.userId),
 			},
-			{
-				$group: {
-					_id: "$status",
-					count: { $sum: 1 },
+		},
+		{
+			$group: {
+				_id: {
+					year: { $year: "$createdAt" },
+					month: { $month: "$createdAt" },
 				},
+				totalBookings: { $sum: 1 },
+				revenue: { $sum: "$totalAmount" },
 			},
-		]);
+		},
+		{ $sort: { "_id.year": 1, "_id.month": 1 } },
+	]);
 
-		res.status(200).json({
-			success: true,
-			data: stats,
-		});
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ message: "Server error" });
+	res.status(200).json({
+		success: true,
+		data: trends,
+	});
+});
+
+
+export const getCancellationStats = asyncHandler(async (req: AuthRequest, res: Response) => {
+
+	if (!req.user) {
+		throw new ApiError(401, "Unauthorized");
 	}
-};
 
-
-
-export const getLocationHeatmap = async (
-	req: AuthRequest,
-	res: Response,
-): Promise<void> => {
-	try {
-		if (!req.user) {
-			res.status(401).json({ message: "Unauthorized" });
-			return;
-		}
-
-		const heatmap = await Booking.aggregate([
-			{
-				$lookup: {
-					from: "events",
-					localField: "event",
-					foreignField: "_id",
-					as: "event",
-				},
+	const stats = await Booking.aggregate([
+		{
+			$lookup: {
+				from: "events",
+				localField: "event",
+				foreignField: "_id",
+				as: "event",
 			},
-			{ $unwind: "$event" },
-			{
-				$match: {
-					"event.organizer": new mongoose.Types.ObjectId(req.user.userId),
-				},
+		},
+		{ $unwind: "$event" },
+		{
+			$match: {
+				"event.organizer": new mongoose.Types.ObjectId(req.user.userId),
 			},
-			{
-				$group: {
-					_id: "$event.location",
-					bookings: { $sum: 1 },
-					revenue: { $sum: "$totalAmount" },
-				},
+		},
+		{
+			$group: {
+				_id: "$status",
+				count: { $sum: 1 },
 			},
-			{ $sort: { bookings: -1 } },
-		]);
+		},
+	]);
 
-		res.status(200).json({
-			success: true,
-			data: heatmap,
-		});
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ message: "Server error" });
+	res.status(200).json({
+		success: true,
+		data: stats,
+	});
+});
+
+export const getLocationHeatmap = asyncHandler(async (req: AuthRequest, res: Response) => {
+
+	if (!req.user) {
+		throw new ApiError(401, "Unauthorized");
 	}
-};
 
+	const heatmap = await Booking.aggregate([
+		{
+			$lookup: {
+				from: "events",
+				localField: "event",
+				foreignField: "_id",
+				as: "event",
+			},
+		},
+		{ $unwind: "$event" },
+		{
+			$match: {
+				"event.organizer": new mongoose.Types.ObjectId(req.user.userId),
+			},
+		},
+		{
+			$group: {
+				_id: "$event.location",
+				bookings: { $sum: 1 },
+				revenue: { $sum: "$totalAmount" },
+			},
+		},
+		{ $sort: { bookings: -1 } },
+	]);
+
+	res.status(200).json({
+		success: true,
+		data: heatmap,
+	});
+});
 
 
 export default {
