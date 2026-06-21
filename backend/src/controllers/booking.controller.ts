@@ -112,3 +112,82 @@ export const getMyBookings = async (
 		});
 	}
 };
+
+export const cancelBooking = async (
+	req: AuthRequest,
+	res: Response,
+): Promise<void> => {
+	try {
+		const bookingId = req.params.bookingId;
+
+		if (!bookingId || typeof bookingId !== "string") {
+			res.status(400).json({
+				message: "Invalid booking id",
+			});
+			return;
+		}
+
+		if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+			res.status(400).json({
+				message: "Invalid booking id",
+			});
+			return;
+		}
+
+		if (!req.user) {
+			res.status(401).json({
+				message: "Unauthorized",
+			});
+			return;
+		}
+
+		const booking = await Booking.findById(bookingId);
+
+		if (!booking) {
+			res.status(404).json({
+				message: "Booking not found",
+			});
+			return;
+		}
+
+		// user can only cancel own booking
+		if (booking.user.toString() !== req.user.userId) {
+			res.status(403).json({
+				message: "Forbidden",
+			});
+			return;
+		}
+
+		if (booking.status === "cancelled") {
+			res.status(400).json({
+				message: "Booking already cancelled",
+			});
+			return;
+		}
+
+		// restore seats
+		await Event.findByIdAndUpdate(
+			booking.event,
+			{
+				$inc: {
+					availableSeats: booking.seatsBooked,
+				},
+			},
+			{ new: true },
+		);
+
+		booking.status = "cancelled";
+		await booking.save();
+
+		res.status(200).json({
+			message: "Booking cancelled successfully",
+			booking,
+		});
+	} catch (error) {
+		console.error(error);
+
+		res.status(500).json({
+			message: "Server error",
+		});
+	}
+};
