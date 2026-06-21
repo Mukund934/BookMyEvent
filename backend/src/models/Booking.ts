@@ -5,26 +5,32 @@ const bookingSchema = new mongoose.Schema(
 		user: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "User",
-			required: true
+			required: true,
 		},
 		event: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "Event",
-			required: true
+			required: true,
 		},
 		seatsBooked: {
 			type: Number,
-			required: true
+			required: true,
+			min: 1,
+		},
+		totalAmount: {
+			type: Number,
+			required: true,
 		},
 		status: {
 			type: String,
 			enum: ["active", "cancelled"],
-			default: "active"
-		}
+			default: "active",
+		},
 	},
 	{
-		timestamps: true
-	}
+		timestamps: true,
+	},
 );
 
+bookingSchema.index({ user: 1, event: 1 }, { unique: true });
 export default mongoose.model("Booking", bookingSchema);
