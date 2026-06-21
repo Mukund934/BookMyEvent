@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import mongoose from "mongoose";
 
 import Booking from "../models/Booking";
@@ -6,178 +6,205 @@ import Event from "../models/Event";
 import { AuthRequest } from "../middleware/auth.middleware";
 import redis from "../config/redis";
 
-export const bookEvent = async (
-	req: AuthRequest,
-	res: Response,
-): Promise<void> => {
+import ApiError from "../utils/ApiError";
+import asyncHandler from "../utils/asyncHandler";
+
+
+export const bookEvent = asyncHandler(async (req: AuthRequest, res: Response) => {
+
+	const { eventId, seats } = req.body;
+
+	if (!req.user) {
+		throw new ApiError(401, "Unauthorized");
+	}
+
+	if (!eventId || !seats || seats <= 0) {
+		throw new ApiError(400, "Invalid request");
+	}
+
+	if (!mongoose.Types.ObjectId.isValid(eventId)) {
+		throw new ApiError(400, "Invalid event id");
+	}
+
+	const session = await mongoose.startSession();
+
 	try {
-		const { eventId, seats } = req.body;
-
-		if (!req.user) {
-			res.status(401).json({ message: "Unauthorized" });
-			return;
-		}
-
-		if (!eventId || !seats || seats <= 0) {
-			res.status(400).json({ message: "Invalid request" });
-			return;
-		}
-
-		if (!mongoose.Types.ObjectId.isValid(eventId)) {
-			res.status(400).json({ message: "Invalid event id" });
-			return;
-		}
-
-		const session = await mongoose.startSession();
 		session.startTransaction();
 
-		try {
-			const existing = await Booking.findOne({
-				user: req.user.userId,
-				event: eventId,
-			}).session(session);
-
-			if (existing) {
-				await session.abortTransaction();
-				session.endSession();
-
-				res.status(409).json({ message: "Already booked this event" });
-				return;
-			}
-
-			const event = await Event.findOneAndUpdate(
-				{
-					_id: eventId,
-					availableSeats: { $gte: seats },
-				},
-				{ $inc: { availableSeats: -seats } },
-				{ new: true, session },
-			);
-
-			if (!event) {
-				await session.abortTransaction();
-				session.endSession();
-
-				res.status(400).json({ message: "Not enough seats available" });
-				return;
-			}
-
-			const booking = await Booking.create(
-				[
-					{
-						user: req.user.userId,
-						event: eventId,
-						seatsBooked: seats,
-						totalAmount: event.price * seats,
-					},
-				],
-				{ session },
-			);
-
-			await session.commitTransaction();
-			session.endSession();
-
-			await redis.del(`analytics:${eventId}`);
-
-			res.status(201).json({
-				message: "Booking successful",
-				booking: booking[0],
-			});
-			return;
-		} catch (err) {
-			await session.abortTransaction();
-			session.endSession();
-			throw err;
-		}
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ message: "Server error" });
-		return;
-	}
-};
-
-export const getMyBookings = async (
-	req: AuthRequest,
-	res: Response,
-): Promise<void> => {
-	try {
-		if (!req.user) {
-			res.status(401).json({ message: "Unauthorized" });
-			return;
-		}
-
-		const bookings = await Booking.find({
+		// prevent duplicate booking
+		const existing = await Booking.findOne({
 			user: req.user.userId,
-		})
-			.populate("event")
-			.sort({ createdAt: -1 });
+			event: eventId,
+		}).session(session);
 
-		res.status(200).json({
+		if (existing) {
+			throw new ApiError(409, "Already booked this event");
+		}
+
+		// atomic seat decrement 
+		const event = await Event.findOneAndUpdate(
+			{
+				_id: eventId,
+				availableSeats: { $gte: seats },
+			},
+			{ $inc: { availableSeats: -seats } },
+			{ new: true, session }
+		);
+
+		if (!event) {
+			throw new ApiError(400, "Not enough seats available");
+		}
+
+		// create booking
+		const booking = await Booking.create(
+			[
+				{
+					user: req.user.userId,
+					event: eventId,
+					seatsBooked: seats,
+					totalAmount: event.price * seats,
+					status: "active",
+				},
+			],
+			{ session }
+		);
+
+		await session.commitTransaction();
+
+		await redis.del(`bookings:user:${req.user.userId}`);
+		await redis.del(`analytics:${eventId}`);
+
+		res.status(201).json({
 			success: true,
-			count: bookings.length,
-			data: bookings,
+			message: "Booking successful",
+			data: booking[0],
 		});
-		return;
 	} catch (error) {
-		console.error(error);
-		res.status(500).json({ message: "Server error" });
-		return;
+		await session.abortTransaction();
+		throw error;
+	} finally {
+		session.endSession();
 	}
-};
+});
 
-export const cancelBooking = async (
-	req: AuthRequest,
-	res: Response,
-): Promise<void> => {
+
+export const getMyBookings = asyncHandler(async (req: AuthRequest, res: Response) => {
+
+	if (!req.user) {
+		throw new ApiError(401, "Unauthorized");
+	}
+
+	const cacheKey = `bookings:user:${req.user.userId}:p:${req.query.page || 1}`;
+
+	//  cache check
+	const cached = await redis.get(cacheKey);
+	if (cached) {
+		return res.status(200).json({
+			success: true,
+			source: "cache",
+			data: JSON.parse(cached),
+		});
+	}
+
+	const { page, limit, skip } = getPagination(req.query as any);
+
+	const bookings = await Booking.find({
+		user: req.user.userId,
+	})
+		.populate("event")
+		.sort({ createdAt: -1 })
+		.skip(skip)
+		.limit(limit);
+
+	const total = await Booking.countDocuments({
+		user: req.user.userId,
+	});
+
+	const response = {
+		bookings,
+		total,
+		page,
+		totalPages: Math.ceil(total / limit),
+	};
+
+	await redis.set(cacheKey, JSON.stringify(response), "EX", 300);
+
+	res.status(200).json({
+		success: true,
+		source: "db",
+		...response,
+	});
+});
+
+
+
+export const cancelBooking = asyncHandler(async (req: AuthRequest, res: Response) => {
+
+	const rawId = req.params.bookingId;
+	const bookingId = Array.isArray(rawId) ? rawId[0] : rawId;
+
+	if (!req.user) {
+		throw new ApiError(401, "Unauthorized");
+	}
+
+	if (!bookingId || !mongoose.Types.ObjectId.isValid(bookingId)) {
+		throw new ApiError(400, "Invalid booking id");
+	}
+
+	const session = await mongoose.startSession();
+
 	try {
-		const rawId = req.params.bookingId;
+		session.startTransaction();
 
-		const bookingId = Array.isArray(rawId) ? rawId[0] : rawId;
-
-		if (!req.user) {
-			res.status(401).json({ message: "Unauthorized" });
-			return;
-		}
-
-		if (!bookingId || !mongoose.Types.ObjectId.isValid(bookingId)) {
-			res.status(400).json({ message: "Invalid booking id" });
-			return;
-		}
-
-		const booking = await Booking.findById(bookingId);
+		const booking = await Booking.findById(bookingId).session(session);
 
 		if (!booking) {
-			res.status(404).json({ message: "Booking not found" });
-			return;
+			throw new ApiError(404, "Booking not found");
 		}
 
 		if (booking.user.toString() !== req.user.userId) {
-			res.status(403).json({ message: "Forbidden" });
-			return;
+			throw new ApiError(403, "Forbidden");
 		}
 
 		if (booking.status === "cancelled") {
-			res.status(400).json({ message: "Already cancelled" });
-			return;
+			throw new ApiError(400, "Already cancelled");
 		}
 
-		await Event.findByIdAndUpdate(booking.event, {
-			$inc: { availableSeats: booking.seatsBooked },
-		});
+		// restore seats
+		await Event.findByIdAndUpdate(
+			booking.event,
+			{
+				$inc: { availableSeats: booking.seatsBooked },
+			},
+			{ session }
+		);
 
 		booking.status = "cancelled";
-		await booking.save();
+		await booking.save({ session });
 
+		await session.commitTransaction();
+
+		// 🔥 CACHE INVALIDATION
+		await redis.del(`bookings:user:${req.user.userId}`);
 		await redis.del(`analytics:${booking.event}`);
 
 		res.status(200).json({
+			success: true,
 			message: "Booking cancelled successfully",
 			data: booking,
 		});
-		return;
 	} catch (error) {
-		console.error(error);
-		res.status(500).json({ message: "Server error" });
-		return;
+		await session.abortTransaction();
+		throw error;
+	} finally {
+		session.endSession();
 	}
-};
+});
+
+function getPagination(query: any): { page: number; limit: number; skip: number } {
+	const page = Math.max(parseInt(query?.page as string, 10) || 1, 1);
+	const limit = Math.max(parseInt(query?.limit as string, 10) || 10, 1);
+	const skip = (page - 1) * limit;
+
+	return { page, limit, skip };
+}
