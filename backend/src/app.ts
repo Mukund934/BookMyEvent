@@ -13,6 +13,7 @@ app.use(
 		credentials: true,
 	}),
 );
+
 app.use(express.json());
 
 securityMiddleware.forEach((middleware) => {
