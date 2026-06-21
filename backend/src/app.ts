@@ -3,11 +3,21 @@ import cors from "cors";
 
 import routes from "./routes";
 import errorMiddleware from "./middleware/error.middleware";
+import { securityMiddleware } from "./middleware/security.middleware";
 
 const app = express();
 
-app.use(cors());
+app.use(
+	cors({
+		origin: process.env.CLIENT_URL || "*",
+		credentials: true,
+	}),
+);
 app.use(express.json());
+
+securityMiddleware.forEach((middleware) => {
+	app.use(middleware);
+});
 
 app.get("/", (_, res) => {
 	res.json({
