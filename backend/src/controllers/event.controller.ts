@@ -1,7 +1,11 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
+
 import Event from "../models/Event";
+import Booking from "../models/Booking";
+
 import { AuthRequest } from "../middleware/auth.middleware";
+import { validateObjectId } from "../utils/validateId";
 
 export const createEvent = async (
 	req: AuthRequest,
@@ -11,23 +15,35 @@ export const createEvent = async (
 		const { title, description, date, location, price, totalSeats } =
 			req.body;
 
+		// auth check
+		if (!req.user) {
+			res.status(401).json({
+				success: false,
+				message: "Unauthorized",
+			});
+			return;
+		}
+
+		// validation
 		if (
 			!title ||
 			!description ||
 			!date ||
 			!location ||
-			!price ||
-			!totalSeats
+			price == null ||
+			totalSeats == null
 		) {
 			res.status(400).json({
+				success: false,
 				message: "All fields are required",
 			});
 			return;
 		}
 
-		if (!req.user) {
-			res.status(401).json({
-				message: "Unauthorized",
+		if (Number(price) < 0 || Number(totalSeats) <= 0) {
+			res.status(400).json({
+				success: false,
+				message: "Invalid numeric values",
 			});
 			return;
 		}
@@ -37,57 +53,67 @@ export const createEvent = async (
 			description,
 			date,
 			location,
-			price,
-			totalSeats,
-			availableSeats: totalSeats,
+			price: Number(price),
+			totalSeats: Number(totalSeats),
+			availableSeats: Number(totalSeats),
 			organizer: req.user.userId,
 		});
 
 		res.status(201).json({
+			success: true,
 			message: "Event created successfully",
-			event,
+			data: event,
 		});
 	} catch (error) {
 		console.error(error);
-
 		res.status(500).json({
+			success: false,
 			message: "Internal Server Error",
 		});
 	}
 };
 
-export const getAllEvents = async (req: Request, res: Response): Promise<void> => {
+export const getAllEvents = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
 	try {
-		const page = parseInt(req.query.page as string) || 1;
-		const limit = parseInt(req.query.limit as string) || 10;
+		const page = Math.max(1, Number(req.query.page) || 1);
+		const limit = Math.min(50, Number(req.query.limit) || 10);
 		const skip = (page - 1) * limit;
 
-		const location = req.query.location as string;
-		const date = req.query.date as string;
+		const { location, date } = req.query;
 
 		const filter: any = {};
 
-		if (location) {
-			filter.location = { $regex: location, $options: "i" };
+		if (location && typeof location === "string") {
+			filter.location = {
+				$regex: location,
+				$options: "i",
+			};
 		}
 
-		if (date) {
+		if (date && typeof date === "string") {
 			filter.date = new Date(date);
 		}
 
-		const events = await Event.find(filter)
-			.sort({ createdAt: -1 })
-			.skip(skip)
-			.limit(limit);
+		const [events, total] = await Promise.all([
+			Event.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
 
-		const total = await Event.countDocuments(filter);
+			Event.countDocuments(filter),
+		]);
 
 		res.status(200).json({
 			success: true,
-			page,
-			totalPages: Math.ceil(total / limit),
-			totalEvents: total,
-			events,
+			data: {
+				events,
+				pagination: {
+					page,
+					limit,
+					totalPages: Math.ceil(total / limit),
+					totalEvents: total,
+				},
+			},
 		});
 	} catch (error) {
 		console.error(error);
@@ -98,27 +124,25 @@ export const getAllEvents = async (req: Request, res: Response): Promise<void> =
 	}
 };
 
-export const getEventById = async (req: Request, res: Response): Promise<void> => {
+export const getEventById = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
 	try {
-		const { id } = req.params;
+		const id = validateObjectId(req.params.id);
 
-		if (!id || typeof id !== "string") {
+		if (!id) {
 			res.status(400).json({
 				success: false,
-				message: "Invalid event ID",
+				message: "Invalid event id",
 			});
 			return;
 		}
 
-		if (!mongoose.Types.ObjectId.isValid(id)) {
-			res.status(400).json({
-				success: false,
-				message: "Invalid event ID format",
-			});
-			return;
-		}
-
-		const event = await Event.findById(id).populate("organizer", "name email");
+		const event = await Event.findById(id).populate(
+			"organizer",
+			"name email",
+		);
 
 		if (!event) {
 			res.status(404).json({
@@ -130,7 +154,82 @@ export const getEventById = async (req: Request, res: Response): Promise<void> =
 
 		res.status(200).json({
 			success: true,
-			event,
+			data: event,
+		});
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({
+			success: false,
+			message: "Server error",
+		});
+	}
+};
+
+export const getEventAnalytics = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
+	try {
+		const id = validateObjectId(req.params.id);
+
+		if (!id) {
+			res.status(400).json({
+				success: false,
+				message: "Invalid event id",
+			});
+			return;
+		}
+
+		const event = await Event.findById(id);
+
+		if (!event) {
+			res.status(404).json({
+				success: false,
+				message: "Event not found",
+			});
+			return;
+		}
+
+		const stats = await Booking.aggregate([
+			{
+				$match: {
+					event: new mongoose.Types.ObjectId(id),
+					status: "active",
+				},
+			},
+			{
+				$group: {
+					_id: "$event",
+					totalBookings: { $sum: 1 },
+					totalSeatsBooked: { $sum: "$seatsBooked" },
+					totalRevenue: { $sum: "$totalAmount" },
+				},
+			},
+		]);
+
+		const analytics = stats[0] ?? {
+			totalBookings: 0,
+			totalSeatsBooked: 0,
+			totalRevenue: 0,
+		};
+
+		const occupancyRate =
+			event.totalSeats > 0
+				? (analytics.totalSeatsBooked / event.totalSeats) * 100
+				: 0;
+
+		res.status(200).json({
+			success: true,
+			data: {
+				eventId: event._id,
+				title: event.title,
+				totalSeats: event.totalSeats,
+				bookedSeats: analytics.totalSeatsBooked,
+				availableSeats: event.availableSeats,
+				totalRevenue: analytics.totalRevenue,
+				bookingCount: analytics.totalBookings,
+				occupancyRate: Number(occupancyRate.toFixed(2)),
+			},
 		});
 	} catch (error) {
 		console.error(error);
