@@ -12,5 +12,5 @@ router.use("/health", healthRoutes);
 router.use("/auth", authRoutes);
 router.use("/protected", protectedRoutes);
 router.use("/events", eventRoutes);
-router.use("bookings", bookingRoutes);
+router.use("/bookings", bookingRoutes);
 export default router;

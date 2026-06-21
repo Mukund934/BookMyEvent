@@ -22,6 +22,13 @@ export const bookEvent = async (
 			return;
 		}
 
+		if (!mongoose.Types.ObjectId.isValid(eventId)) {
+			res.status(400).json({
+				message: "Invalid event id",
+			});
+			return;
+		}
+
 		//  prevent duplicate booking
 		const existing = await Booking.findOne({
 			user: req.user.userId,
@@ -31,13 +38,6 @@ export const bookEvent = async (
 		if (existing) {
 			res.status(409).json({
 				message: "Already booked this event",
-			});
-			return;
-		}
-
-		if (!mongoose.Types.ObjectId.isValid(eventId)) {
-			res.status(400).json({
-				message: "Invalid event id",
 			});
 			return;
 		}
@@ -78,5 +78,37 @@ export const bookEvent = async (
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ message: "Server error" });
+	}
+};
+
+export const getMyBookings = async (
+	req: AuthRequest,
+	res: Response,
+): Promise<void> => {
+	try {
+		if (!req.user) {
+			res.status(401).json({
+				message: "Unauthorized",
+			});
+			return;
+		}
+
+		const bookings = await Booking.find({
+			user: req.user.userId,
+		})
+			.populate("event")
+			.sort({ createdAt: -1 });
+
+		res.status(200).json({
+			success: true,
+			count: bookings.length,
+			bookings,
+		});
+	} catch (error) {
+		console.error(error);
+
+		res.status(500).json({
+			message: "Server error",
+		});
 	}
 };
