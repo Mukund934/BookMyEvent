@@ -7,6 +7,8 @@ import Booking from "../models/Booking";
 import { AuthRequest } from "../middleware/auth.middleware";
 import { validateObjectId } from "../utils/validateId";
 
+import redis from "../config/redis";
+
 export const createEvent = async (
 	req: AuthRequest,
 	res: Response,
@@ -170,12 +172,34 @@ export const getEventAnalytics = async (
 	res: Response,
 ): Promise<void> => {
 	try {
-		const id = validateObjectId(req.params.id);
+		const rawId = req.params.id;
+
+		if (!rawId || Array.isArray(rawId)) {
+			res.status(400).json({
+				success: false,
+				message: "Event id required",
+			});
+			return;
+		}
+
+		const id = validateObjectId(rawId);
 
 		if (!id) {
 			res.status(400).json({
 				success: false,
 				message: "Invalid event id",
+			});
+			return;
+		}
+
+		const cacheKey = `analytics:${id}`;
+
+		const cached = await redis.get(cacheKey);
+		if (cached) {
+			res.status(200).json({
+				success: true,
+				data: JSON.parse(cached),
+				cached: true,
 			});
 			return;
 		}
@@ -207,7 +231,7 @@ export const getEventAnalytics = async (
 			},
 		]);
 
-		const analytics = stats[0] ?? {
+		const analytics = stats[0] || {
 			totalBookings: 0,
 			totalSeatsBooked: 0,
 			totalRevenue: 0,
@@ -218,24 +242,25 @@ export const getEventAnalytics = async (
 				? (analytics.totalSeatsBooked / event.totalSeats) * 100
 				: 0;
 
+		const responseData = {
+			eventId: event._id,
+			title: event.title,
+			totalSeats: event.totalSeats,
+			bookedSeats: analytics.totalSeatsBooked,
+			availableSeats: event.availableSeats,
+			totalRevenue: analytics.totalRevenue,
+			bookingCount: analytics.totalBookings,
+			occupancyRate: Number(occupancyRate.toFixed(2)),
+		};
+
+		await redis.setex(cacheKey, 60, JSON.stringify(responseData));
+
 		res.status(200).json({
 			success: true,
-			data: {
-				eventId: event._id,
-				title: event.title,
-				totalSeats: event.totalSeats,
-				bookedSeats: analytics.totalSeatsBooked,
-				availableSeats: event.availableSeats,
-				totalRevenue: analytics.totalRevenue,
-				bookingCount: analytics.totalBookings,
-				occupancyRate: Number(occupancyRate.toFixed(2)),
-			},
+			data: responseData,
 		});
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({
-			success: false,
-			message: "Server error",
-		});
+		res.status(500).json({ success: false, message: "Server error" });
 	}
 };

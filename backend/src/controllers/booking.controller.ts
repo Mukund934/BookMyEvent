@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import Booking from "../models/Booking";
 import Event from "../models/Event";
 import { AuthRequest } from "../middleware/auth.middleware";
+import redis from "../config/redis";
 
 export const bookEvent = async (
 	req: AuthRequest,
@@ -70,6 +71,8 @@ export const bookEvent = async (
 			seatsBooked: seats,
 			totalAmount,
 		});
+
+		await redis.del(`analytics:${eventId}`);
 
 		res.status(201).json({
 			message: "Booking successful",
@@ -178,6 +181,8 @@ export const cancelBooking = async (
 
 		booking.status = "cancelled";
 		await booking.save();
+
+		await redis.del(`analytics:${booking.event}`);
 
 		res.status(200).json({
 			message: "Booking cancelled successfully",

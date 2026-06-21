@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 import Booking from "../models/Booking";
 import { AuthRequest } from "../middleware/auth.middleware";
-
+import redis from "../config/redis";
 
 export const getTopEventsByRevenue = async (
 	req: AuthRequest,
