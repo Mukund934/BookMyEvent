@@ -24,63 +24,75 @@ export const bookEvent = async (
 		}
 
 		if (!mongoose.Types.ObjectId.isValid(eventId)) {
-			res.status(400).json({
-				message: "Invalid event id",
-			});
+			res.status(400).json({ message: "Invalid event id" });
 			return;
 		}
 
-		//  prevent duplicate booking
-		const existing = await Booking.findOne({
-			user: req.user.userId,
-			event: eventId,
-		});
+		const session = await mongoose.startSession();
+		session.startTransaction();
 
-		if (existing) {
-			res.status(409).json({
-				message: "Already booked this event",
+		try {
+			const existing = await Booking.findOne({
+				user: req.user.userId,
+				event: eventId,
+			}).session(session);
+
+			if (existing) {
+				await session.abortTransaction();
+				session.endSession();
+
+				res.status(409).json({ message: "Already booked this event" });
+				return;
+			}
+
+			const event = await Event.findOneAndUpdate(
+				{
+					_id: eventId,
+					availableSeats: { $gte: seats },
+				},
+				{ $inc: { availableSeats: -seats } },
+				{ new: true, session },
+			);
+
+			if (!event) {
+				await session.abortTransaction();
+				session.endSession();
+
+				res.status(400).json({ message: "Not enough seats available" });
+				return;
+			}
+
+			const booking = await Booking.create(
+				[
+					{
+						user: req.user.userId,
+						event: eventId,
+						seatsBooked: seats,
+						totalAmount: event.price * seats,
+					},
+				],
+				{ session },
+			);
+
+			await session.commitTransaction();
+			session.endSession();
+
+			await redis.del(`analytics:${eventId}`);
+
+			res.status(201).json({
+				message: "Booking successful",
+				booking: booking[0],
 			});
 			return;
+		} catch (err) {
+			await session.abortTransaction();
+			session.endSession();
+			throw err;
 		}
-
-		// ATOMIC seat reduction
-
-		const event = await Event.findOneAndUpdate(
-			{
-				_id: eventId,
-				availableSeats: { $gte: seats },
-			},
-			{
-				$inc: { availableSeats: -seats },
-			},
-			{ new: true },
-		);
-
-		if (!event) {
-			res.status(400).json({
-				message: "Not enough seats available",
-			});
-			return;
-		}
-
-		const totalAmount = event.price * seats;
-
-		const booking = await Booking.create({
-			user: req.user.userId,
-			event: eventId,
-			seatsBooked: seats,
-			totalAmount,
-		});
-
-		await redis.del(`analytics:${eventId}`);
-
-		res.status(201).json({
-			message: "Booking successful",
-			booking,
-		});
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ message: "Server error" });
+		return;
 	}
 };
 
@@ -90,9 +102,7 @@ export const getMyBookings = async (
 ): Promise<void> => {
 	try {
 		if (!req.user) {
-			res.status(401).json({
-				message: "Unauthorized",
-			});
+			res.status(401).json({ message: "Unauthorized" });
 			return;
 		}
 
@@ -105,14 +115,13 @@ export const getMyBookings = async (
 		res.status(200).json({
 			success: true,
 			count: bookings.length,
-			bookings,
+			data: bookings,
 		});
+		return;
 	} catch (error) {
 		console.error(error);
-
-		res.status(500).json({
-			message: "Server error",
-		});
+		res.status(500).json({ message: "Server error" });
+		return;
 	}
 };
 
@@ -121,63 +130,40 @@ export const cancelBooking = async (
 	res: Response,
 ): Promise<void> => {
 	try {
-		const bookingId = req.params.bookingId;
+		const rawId = req.params.bookingId;
 
-		if (!bookingId || typeof bookingId !== "string") {
-			res.status(400).json({
-				message: "Invalid booking id",
-			});
-			return;
-		}
-
-		if (!mongoose.Types.ObjectId.isValid(bookingId)) {
-			res.status(400).json({
-				message: "Invalid booking id",
-			});
-			return;
-		}
+		const bookingId = Array.isArray(rawId) ? rawId[0] : rawId;
 
 		if (!req.user) {
-			res.status(401).json({
-				message: "Unauthorized",
-			});
+			res.status(401).json({ message: "Unauthorized" });
+			return;
+		}
+
+		if (!bookingId || !mongoose.Types.ObjectId.isValid(bookingId)) {
+			res.status(400).json({ message: "Invalid booking id" });
 			return;
 		}
 
 		const booking = await Booking.findById(bookingId);
 
 		if (!booking) {
-			res.status(404).json({
-				message: "Booking not found",
-			});
+			res.status(404).json({ message: "Booking not found" });
 			return;
 		}
 
-		// user can only cancel own booking
 		if (booking.user.toString() !== req.user.userId) {
-			res.status(403).json({
-				message: "Forbidden",
-			});
+			res.status(403).json({ message: "Forbidden" });
 			return;
 		}
 
 		if (booking.status === "cancelled") {
-			res.status(400).json({
-				message: "Booking already cancelled",
-			});
+			res.status(400).json({ message: "Already cancelled" });
 			return;
 		}
 
-		// restore seats
-		await Event.findByIdAndUpdate(
-			booking.event,
-			{
-				$inc: {
-					availableSeats: booking.seatsBooked,
-				},
-			},
-			{ new: true },
-		);
+		await Event.findByIdAndUpdate(booking.event, {
+			$inc: { availableSeats: booking.seatsBooked },
+		});
 
 		booking.status = "cancelled";
 		await booking.save();
@@ -186,13 +172,12 @@ export const cancelBooking = async (
 
 		res.status(200).json({
 			message: "Booking cancelled successfully",
-			booking,
+			data: booking,
 		});
+		return;
 	} catch (error) {
 		console.error(error);
-
-		res.status(500).json({
-			message: "Server error",
-		});
+		res.status(500).json({ message: "Server error" });
+		return;
 	}
 };
