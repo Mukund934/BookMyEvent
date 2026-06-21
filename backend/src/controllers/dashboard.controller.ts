@@ -9,6 +9,9 @@ import redis from "../config/redis";
 import ApiError from "../utils/ApiError";
 import asyncHandler from "../utils/asyncHandler";
 
+import Event from "../models/Event";
+
+
 const getOrganizerMatch = (userId: string) => ({
 	"event.organizer": new mongoose.Types.ObjectId(userId),
 });
@@ -180,9 +183,137 @@ export const getLocationHeatmap = asyncHandler(
 	},
 );
 
+export const getDashboardOverview = asyncHandler(
+	async (req: AuthRequest, res: Response) => {
+		if (!req.user) {
+			throw new ApiError(401, "Unauthorized");
+		}
+
+		const cacheKey = `dashboard:overview:${req.user.userId}`;
+
+		const cached = await redis.get(cacheKey);
+
+		if (cached) {
+			return res.status(200).json({
+				success: true,
+				source: "cache",
+				data: JSON.parse(cached),
+			});
+		}
+
+		const organizerId = new mongoose.Types.ObjectId(
+			req.user.userId,
+		);
+
+		const topEvents = await Booking.aggregate([
+			...basePipeline(req.user.userId),
+			{
+				$group: {
+					_id: "$event._id",
+					title: { $first: "$event.title" },
+					revenue: { $sum: "$totalAmount" },
+					bookings: { $sum: 1 },
+				},
+			},
+			{ $sort: { revenue: -1 } },
+			{ $limit: 5 },
+		]);
+
+		const monthlyTrends = await Booking.aggregate([
+			...basePipeline(req.user.userId),
+			{
+				$group: {
+					_id: {
+						year: { $year: "$createdAt" },
+						month: { $month: "$createdAt" },
+					},
+					totalBookings: { $sum: 1 },
+					revenue: { $sum: "$totalAmount" },
+				},
+			},
+			{
+				$sort: {
+					"_id.year": 1,
+					"_id.month": 1,
+				},
+			},
+		]);
+
+		const organizerEvents = await Event.find({
+			organizer: organizerId,
+		}).select("_id");
+
+		const eventIds = organizerEvents.map((event) => event._id);
+
+		const totalBookings = await Booking.countDocuments({
+			event: { $in: eventIds },
+		});
+
+		const cancelledBookings = await Booking.countDocuments({
+			event: { $in: eventIds },
+			status: "cancelled",
+		});
+
+		const revenueResult = await Booking.aggregate([
+			{
+				$match: {
+					event: { $in: eventIds },
+					status: "active",
+				},
+			},
+			{
+				$group: {
+					_id: null,
+					totalRevenue: {
+						$sum: "$totalAmount",
+					},
+				},
+			},
+		]);
+
+		const totalRevenue =
+			revenueResult[0]?.totalRevenue || 0;
+
+		const cancellationRate =
+			totalBookings > 0
+				? Number(
+						(
+							(cancelledBookings /
+								totalBookings) *
+							100
+						).toFixed(2),
+				  )
+				: 0;
+
+		const responseData = {
+			totalRevenue,
+			totalBookings,
+			cancelledBookings,
+			cancellationRate,
+			topEvents,
+			monthlyTrends,
+		};
+
+		await redis.set(
+			cacheKey,
+			JSON.stringify(responseData),
+			"EX",
+			300,
+		);
+
+		res.status(200).json({
+			success: true,
+			source: "db",
+			data: responseData,
+		});
+	},
+);
+
+
 export default {
 	getTopEventsByRevenue,
 	getMonthlyBookingTrends,
 	getCancellationStats,
 	getLocationHeatmap,
+	getDashboardOverview,
 };
