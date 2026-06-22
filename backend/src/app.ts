@@ -5,6 +5,9 @@ import routes from "./routes";
 import errorMiddleware from "./middleware/error.middleware";
 import { securityMiddleware } from "./middleware/security.middleware";
 
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./config/swagger";
+
 const app = express();
 
 app.use(
@@ -26,6 +29,12 @@ app.get("/", (_, res) => {
 		message: "BookMyEvent API Running"
 	});
 });
+
+app.use(
+	"/api-docs",
+	swaggerUi.serve,
+	swaggerUi.setup(swaggerSpec),
+);
 
 app.use("/api", routes);
 
