@@ -15,6 +15,22 @@ const router = Router();
  *       - Bookings
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - eventId
+ *               - seats
+ *             properties:
+ *               eventId:
+ *                 type: string
+ *                 example: 63a123456789abcdef123456
+ *               seats:
+ *                 type: number
+ *                 example: 2
  *     responses:
  *       201:
  *         description: Booking created successfully
@@ -33,11 +49,19 @@ router.post("/", protect, bookEvent);
  *       - Bookings
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
  *         description: User bookings
  */
-
 
 router.get("/my-bookings", protect, getMyBookings);
 

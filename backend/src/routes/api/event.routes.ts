@@ -20,6 +20,23 @@ const router = Router();
  *     summary: Get all events
  *     tags:
  *       - Events
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: location
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: date
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: List of all events
@@ -56,6 +73,38 @@ router.get("/:id", getEventById);
  *       - Events
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - description
+ *               - date
+ *               - location
+ *               - price
+ *               - totalSeats
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: React Summit 2026
+ *               description:
+ *                 type: string
+ *                 example: Frontend Conference
+ *               date:
+ *                 type: string
+ *                 format: date-time
+ *               location:
+ *                 type: string
+ *                 example: Raipur
+ *               price:
+ *                 type: number
+ *                 example: 499
+ *               totalSeats:
+ *                 type: number
+ *                 example: 100
  *     responses:
  *       201:
  *         description: Event created successfully
