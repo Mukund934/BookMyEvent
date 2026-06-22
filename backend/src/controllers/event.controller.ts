@@ -73,22 +73,38 @@ export const getAllEvents = asyncHandler(
 			filter.date = new Date(date);
 		}
 
+		const cacheKey = `events:${page}:${limit}:${location || "all"}:${date || "all"}`;
+
+		const cached = await redis.get(cacheKey);
+
+		if (cached) {
+			return res.status(200).json({
+				success: true,
+				source: "cache",
+				data: JSON.parse(cached),
+			});
+		}
+
 		const [events, total] = await Promise.all([
 			Event.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
 			Event.countDocuments(filter),
 		]);
 
+		const responseData = {
+			events,
+			pagination: {
+				page,
+				limit,
+				totalPages: Math.ceil(total / limit),
+				totalEvents: total,
+			},
+		};
+		await redis.set(cacheKey, JSON.stringify(responseData), "EX", 300);
+
 		res.status(200).json({
 			success: true,
-			data: {
-				events,
-				pagination: {
-					page,
-					limit,
-					totalPages: Math.ceil(total / limit),
-					totalEvents: total,
-				},
-			},
+			source: "db",
+			data: responseData,
 		});
 	},
 );
@@ -97,21 +113,41 @@ export const getEventById = asyncHandler(
 	async (req: Request, res: Response) => {
 		const id = validateObjectId(req.params.id);
 
-		if (!id) throw new ApiError(400, "Invalid event id");
+		if (!id) {
+			throw new ApiError(400, "Invalid event id");
+		}
+
+		const cacheKey = `event:${id}`;
+
+		const cached = await redis.get(cacheKey);
+
+		if (cached) {
+			return res.status(200).json({
+				success: true,
+				source: "cache",
+				data: JSON.parse(cached),
+			});
+		}
 
 		const event = await Event.findById(id).populate(
 			"organizer",
 			"name email",
 		);
 
-		if (!event) throw new ApiError(404, "Event not found");
+		if (!event) {
+			throw new ApiError(404, "Event not found");
+		}
+
+		await redis.set(cacheKey, JSON.stringify(event), "EX", 300);
 
 		res.status(200).json({
 			success: true,
+			source: "db",
 			data: event,
 		});
 	},
 );
+
 export const getEventAnalytics = asyncHandler(
 	async (req: Request, res: Response) => {
 		const rawId = req.params.id;

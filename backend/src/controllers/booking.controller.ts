@@ -71,8 +71,18 @@ export const bookEvent = asyncHandler(async (req: AuthRequest, res: Response) =>
 
 		await session.commitTransaction();
 
-		await redis.del(`bookings:user:${req.user.userId}`);
+		const keys = await redis.keys(
+    `bookings:user:${req.user.userId}:*`
+);
+
+if (keys.length) {
+    await redis.del(...keys);
+}
 		await redis.del(`analytics:${eventId}`);
+
+		await redis.del(
+	`dashboard:overview:${event.organizer}`
+);
 
 		res.status(201).json({
 			success: true,
@@ -184,9 +194,24 @@ export const cancelBooking = asyncHandler(async (req: AuthRequest, res: Response
 
 		await session.commitTransaction();
 
-		// 🔥 CACHE INVALIDATION
-		await redis.del(`bookings:user:${req.user.userId}`);
+		const keys = await redis.keys(
+    `bookings:user:${req.user.userId}:*`
+);
+
+if (keys.length) {
+    await redis.del(...keys);
+}
 		await redis.del(`analytics:${booking.event}`);
+
+		const eventDoc = await Event.findById(
+	booking.event
+);
+
+if (eventDoc) {
+	await redis.del(
+		`dashboard:overview:${eventDoc.organizer}`
+	);
+}
 
 		res.status(200).json({
 			success: true,

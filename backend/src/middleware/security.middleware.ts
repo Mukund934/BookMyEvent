@@ -1,11 +1,8 @@
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import mongoSanitize from "express-mongo-sanitize";
 
 export const securityMiddleware = [
 	helmet(),
-
-	mongoSanitize(),
 
 	rateLimit({
 		windowMs: 15 * 60 * 1000,

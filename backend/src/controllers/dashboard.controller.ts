@@ -11,7 +11,6 @@ import asyncHandler from "../utils/asyncHandler";
 
 import Event from "../models/Event";
 
-
 const getOrganizerMatch = (userId: string) => ({
 	"event.organizer": new mongoose.Types.ObjectId(userId),
 });
@@ -183,6 +182,7 @@ export const getLocationHeatmap = asyncHandler(
 	},
 );
 
+
 export const getDashboardOverview = asyncHandler(
 	async (req: AuthRequest, res: Response) => {
 		if (!req.user) {
@@ -194,12 +194,20 @@ export const getDashboardOverview = asyncHandler(
 		const cached = await redis.get(cacheKey);
 
 		if (cached) {
+			console.log(
+				`[REDIS HIT] Dashboard -> ${req.user.userId}`,
+			);
+
 			return res.status(200).json({
 				success: true,
 				source: "cache",
 				data: JSON.parse(cached),
 			});
 		}
+
+		console.log(
+			`[REDIS MISS] Dashboard -> ${req.user.userId}`,
+		);
 
 		const organizerId = new mongoose.Types.ObjectId(
 			req.user.userId,
@@ -243,16 +251,19 @@ export const getDashboardOverview = asyncHandler(
 			organizer: organizerId,
 		}).select("_id");
 
-		const eventIds = organizerEvents.map((event) => event._id);
+		const eventIds = organizerEvents.map(
+			(event) => event._id,
+		);
 
 		const totalBookings = await Booking.countDocuments({
 			event: { $in: eventIds },
 		});
 
-		const cancelledBookings = await Booking.countDocuments({
-			event: { $in: eventIds },
-			status: "cancelled",
-		});
+		const cancelledBookings =
+			await Booking.countDocuments({
+				event: { $in: eventIds },
+				status: "cancelled",
+			});
 
 		const revenueResult = await Booking.aggregate([
 			{
@@ -301,6 +312,10 @@ export const getDashboardOverview = asyncHandler(
 			300,
 		);
 
+		console.log(
+			`[REDIS STORE] ${cacheKey}`,
+		);
+
 		res.status(200).json({
 			success: true,
 			source: "db",
@@ -308,7 +323,6 @@ export const getDashboardOverview = asyncHandler(
 		});
 	},
 );
-
 
 export default {
 	getTopEventsByRevenue,
