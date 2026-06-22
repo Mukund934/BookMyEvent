@@ -33,9 +33,10 @@ export const bookEvent = asyncHandler(async (req: AuthRequest, res: Response) =>
 
 		// prevent duplicate booking
 		const existing = await Booking.findOne({
-			user: req.user.userId,
-			event: eventId,
-		}).session(session);
+	user: req.user.userId,
+	event: eventId,
+	status: "active",
+}).session(session);
 
 		if (existing) {
 			throw new ApiError(409, "Already booked this event");
@@ -79,6 +80,14 @@ if (keys.length) {
     await redis.del(...keys);
 }
 		await redis.del(`analytics:${eventId}`);
+
+		await redis.del(`event:${eventId}`);
+
+const eventKeys = await redis.keys("events:*");
+
+if (eventKeys.length) {
+	await redis.del(...eventKeys);
+}
 
 		await redis.del(
 	`dashboard:overview:${event.organizer}`
@@ -202,6 +211,16 @@ if (keys.length) {
     await redis.del(...keys);
 }
 		await redis.del(`analytics:${booking.event}`);
+
+		
+
+		await redis.del(`event:${booking.event}`);
+
+const eventKeys = await redis.keys("events:*");
+
+if (eventKeys.length) {
+	await redis.del(...eventKeys);
+}
 
 		const eventDoc = await Event.findById(
 	booking.event
