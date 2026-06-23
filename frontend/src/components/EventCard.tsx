@@ -7,22 +7,35 @@ interface Props {
 
 const EventCard = ({ event }: Props) => {
 	return (
-		<div className="rounded-2xl border border-zinc-800 bg-[#111113] p-6 transition duration-300 hover:-translate-y-1 hover:border-zinc-700">
+		<div className="
+	group
+	rounded-2xl
+	border
+	border-zinc-800
+	bg-[#111113]
+	p-6
+	transition-all
+	duration-200
+	hover:-translate-y-1
+	hover:border-violet-500/20
+	hover:shadow-lg
+	hover:shadow-violet-500/5
+">
 			<div className="mb-4 flex items-center justify-between">
-				<span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs text-violet-400">
-					Event
-				</span>
+				<span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-400">
+	Event
+</span>
 
-				<span className="text-sm text-zinc-500">
-					₹{event.price}
-				</span>
+				<span className="text-sm font-medium text-violet-400">
+	₹{event.price}
+</span>
 			</div>
 
 			<h3 className="mb-3 text-xl font-semibold text-white">
 				{event.title}
 			</h3>
 
-			<p className="mb-5 line-clamp-3 text-sm text-zinc-400">
+			<p className="mb-13 line-clamp-5 text-sm text-zinc-400">
 				{event.description}
 			</p>
 
@@ -45,7 +58,21 @@ const EventCard = ({ event }: Props) => {
 
 			<Link
 				to={`/events/${event._id}`}
-				className="block rounded-xl bg-violet-600 py-3 text-center text-sm font-medium text-white transition hover:bg-violet-500"
+				className="
+	block
+	rounded-xl
+	bg-violet-600
+	py-3
+	text-center
+	text-sm
+	font-medium
+	text-white
+	transition-all
+	duration-200
+	hover:bg-violet-500
+	hover:shadow-lg
+	hover:shadow-violet-500/20
+"
 			>
 				View Details
 			</Link>

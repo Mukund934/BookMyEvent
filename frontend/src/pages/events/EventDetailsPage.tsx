@@ -77,7 +77,13 @@ const EventDetailsPage = () => {
 		return (
 			<div className="min-h-screen bg-[#09090B] text-white">
 				<div className="mx-auto max-w-7xl px-6 py-20">
-					<p className="text-zinc-400">Loading event...</p>
+					<div className="flex items-center justify-center">
+	<div className="rounded-xl border border-zinc-800 bg-[#111113] px-6 py-4">
+		<p className="text-zinc-400">
+			Loading event details...
+		</p>
+	</div>
+</div>
 				</div>
 			</div>
 		);
@@ -118,14 +124,10 @@ const EventDetailsPage = () => {
 						<div>
 							<Link
 								to="/events"
-								className="mb-6 inline-flex items-center gap-2 text-sm text-zinc-400 transition hover:text-white"
+								className="mb-4 inline-flex rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-2 text-sm text-violet-400 transition hover:text-violet-200"
 							>
 								← Back to Events
 							</Link>
-
-							<span className="mb-4 inline-flex rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-2 text-sm text-violet-400">
-								Event
-							</span>
 
 							<h1 className="max-w-4xl text-5xl font-bold tracking-tight">
 								{event.title}
@@ -135,15 +137,21 @@ const EventDetailsPage = () => {
 								{event.description}
 							</p>
 
-							<div className="mt-6 flex flex-wrap gap-6 text-sm text-zinc-400">
-								<span>📍 {event.location}</span>
+							<div className="mt-6 flex flex-wrap gap-3">
+								<span className="rounded-full border border-zinc-800 bg-[#111113]/70 px-4 py-2 text-sm text-zinc-300">
+									📍 {event.location}
+								</span>
 
-								<span>
+								<span className="rounded-full border border-zinc-800 bg-[#111113]/70 px-4 py-2 text-sm text-zinc-300">
 									📅{" "}
 									{new Date(event.date).toLocaleDateString()}
 								</span>
 
-								<span>
+								<span className={
+	event.availableSeats < 10
+		? "rounded-full border border-red-500/20 bg-red-500/3 px-3 py-1 text-red-400"
+		: "rounded-full border border-green-500/20 bg-green-500/3 px-3 py-1 text-green-400"
+}>
 									🎟 {event.availableSeats} seats left
 								</span>
 							</div>
@@ -154,20 +162,74 @@ const EventDetailsPage = () => {
 				<div className="mx-auto max-w-7xl px-6 py-16">
 					<div className="grid gap-8 lg:grid-cols-[1.7fr_0.8fr]">
 						<div className="space-y-8">
-							<div className="rounded-2xl border border-zinc-800 bg-[#111113] p-8">
+							<div
+								className="
+	group
+	rounded-2xl
+	border
+	border-zinc-800
+	bg-[#111113]
+	p-8
+	transition-all
+	duration-200
+	hover:border-violet-500/20
+	hover:shadow-lg
+	hover:shadow-violet-500/5
+"
+							>
 								<h2 className="mb-5 text-2xl font-bold">
 									Event Overview
 								</h2>
 
-								<p className="leading-relaxed text-zinc-400">
+								<p className="
+	group
+	rounded-2xl
+	border
+	border-zinc-800
+	bg-[#111113]
+	p-8
+	transition-all
+	duration-200
+	hover:-translate-y-1
+	hover:border-violet-500/20
+	hover:shadow-lg
+	hover:shadow-violet-500/5
+">
 									{event.description}
 								</p>
 							</div>
 
-							<div className="rounded-2xl border border-zinc-800 bg-[#111113] p-8">
+							<div
+								className="
+	group
+	rounded-2xl
+	border
+	border-zinc-800
+	bg-[#111113]
+	p-8
+	transition-all
+	duration-200
+	hover:border-violet-500/20
+	hover:shadow-lg
+	hover:shadow-violet-500/5
+"
+							>
 								<h2 className="mb-5 text-2xl font-bold">
 									Event Information
 								</h2>
+
+                                <div className="rounded-2xl border border-zinc-800 bg-[#111113] p-8">
+	<h2 className="mb-5 text-2xl font-bold">
+		Why Attend?
+	</h2>
+
+	<ul className="space-y-3 text-zinc-400">
+		<li>✓ Secure online booking</li>
+		<li>✓ Instant booking confirmation</li>
+		<li>✓ Real-time seat availability</li>
+		<li>✓ Easy cancellation management</li>
+	</ul>
+</div>
 
 								<div className="grid gap-5 md:grid-cols-2">
 									<div>
@@ -214,7 +276,21 @@ const EventDetailsPage = () => {
 								</div>
 							</div>
 
-							<div className="rounded-2xl border border-zinc-800 bg-[#111113] p-8">
+							<div
+								className="
+	group
+	rounded-2xl
+	border
+	border-zinc-800
+	bg-[#111113]
+	p-8
+	transition-all
+	duration-200
+	hover:border-violet-500/20
+	hover:shadow-lg
+	hover:shadow-violet-500/5
+"
+							>
 								<h2 className="mb-5 text-2xl font-bold">
 									Organizer
 								</h2>
@@ -238,13 +314,28 @@ const EventDetailsPage = () => {
 						</div>
 
 						<div>
-							<div className="sticky top-24 rounded-2xl border border-zinc-800 bg-[#111113] p-6">
+							<div
+								className="
+		sticky
+		top-24
+		rounded-2xl
+		border
+		border-zinc-800
+		bg-[#111113]
+		p-6
+		transition-all
+		duration-200
+		hover:border-violet-500/20
+		hover:shadow-lg
+		hover:shadow-violet-500/5
+	"
+							>
 								<div className="mb-6">
 									<p className="text-sm text-zinc-500">
 										Starting From
 									</p>
 
-									<h2 className="text-4xl font-bold">
+									<h2 className="text-4xl font-bold tracking-tight text-violet-400">
 										₹{event.price}
 									</h2>
 								</div>
@@ -261,7 +352,20 @@ const EventDetailsPage = () => {
 													Math.max(1, tickets - 1),
 												)
 											}
-											className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-700"
+											className="
+	flex
+	h-10
+	w-10
+	items-center
+	justify-center
+	rounded-xl
+	border
+	border-zinc-700
+	transition-all
+	duration-200
+	hover:border-violet-500/30
+	hover:bg-violet-500/10
+"
 										>
 											-
 										</button>
@@ -274,7 +378,20 @@ const EventDetailsPage = () => {
 											onClick={() =>
 												setTickets(tickets + 1)
 											}
-											className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-700"
+											className="
+	flex
+	h-10
+	w-10
+	items-center
+	justify-center
+	rounded-xl
+	border
+	border-zinc-700
+	transition-all
+	duration-200
+	hover:border-violet-500/30
+	hover:bg-violet-500/10
+"
 										>
 											+
 										</button>
@@ -297,14 +414,31 @@ const EventDetailsPage = () => {
 									<div className="flex justify-between border-t border-zinc-800 pt-3 text-lg font-semibold">
 										<span>Total</span>
 
-										<span>₹{totalPrice}</span>
+										<span className="text-violet-400">
+	₹{totalPrice}
+</span>
 									</div>
 								</div>
 
 								<button
 									onClick={handleBooking}
 									disabled={bookingLoading}
-									className="w-full rounded-xl bg-violet-600 py-3 text-sm font-medium text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
+									className="
+	w-full
+	rounded-xl
+	bg-violet-600
+	py-3
+	text-sm
+	font-medium
+	text-white
+	transition-all
+	duration-200
+	hover:bg-violet-500
+	hover:shadow-lg
+	hover:shadow-violet-500/20
+	disabled:cursor-not-allowed
+	disabled:opacity-50
+"
 								>
 									{bookingLoading
 										? "Booking..."
