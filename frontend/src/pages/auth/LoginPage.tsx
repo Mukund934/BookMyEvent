@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
+import logo from "../../assets/BookMyEventLogo.png";
 import authService from "../../services/auth.service";
 
 const LoginPage = () => {
@@ -46,13 +46,32 @@ const LoginPage = () => {
 	return (
 		<div className="min-h-screen bg-[#09090B] text-white">
 			<div className="mx-auto flex min-h-screen max-w-7xl items-center justify-center px-6">
-				<div className="grid w-full max-w-6xl overflow-hidden rounded-3xl border border-zinc-800 bg-[#111113] lg:grid-cols-2">
+				<div
+	className="
+		w-full
+		max-w-6xl
+		overflow-hidden
+		rounded-3xl
+		border
+		border-zinc-800
+		bg-[#111113]
+		lg:grid
+		lg:grid-cols-2
+		transition-all
+		duration-300
+		hover:border-violet-500/20
+		hover:shadow-2xl
+		hover:shadow-violet-500/5
+	"
+>
 
 					<div className="hidden border-r border-zinc-800 p-12 lg:flex lg:flex-col lg:justify-center">
 						<div className="mb-6 flex items-center gap-3">
-							<div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-600 font-bold">
-								B
-							</div>
+							<img
+	src={logo}
+	alt="BookMyEvent"
+	className="h-30 w-30 rounded-[19px] object-cover"
+/>
 
 							<span className="text-2xl font-bold">
 								BookMyEvent
@@ -73,10 +92,10 @@ const LoginPage = () => {
 						</p>
 
 						<div className="space-y-4 text-zinc-300">
-							<p>✓ Secure Authentication</p>
-							<p>✓ Event Management Dashboard</p>
-							<p>✓ Booking Tracking</p>
-							<p>✓ Real-Time Insights</p>
+							<p>✓ Secure JWT Authenticationn</p>
+							<p>✓ Create & Manage Events</p>
+							<p>✓ Smart Booking Management</p>
+							<p>✓ Analytics Dashboard</p>
 						</div>
 					</div>
 
@@ -110,7 +129,23 @@ const LoginPage = () => {
 											)
 										}
 										placeholder="you@example.com"
-										className="w-full rounded-xl border border-zinc-700 bg-[#09090B] px-4 py-3 text-white outline-none transition focus:border-violet-500"
+										className="
+	w-full
+	rounded-xl
+	border
+	border-zinc-700
+	bg-[#09090B]
+	px-4
+	py-3
+	text-white
+	outline-none
+	transition-all
+	duration-200
+	hover:border-zinc-600
+	focus:border-violet-500
+	focus:shadow-lg
+	focus:shadow-violet-500/10
+"
 									/>
 								</div>
 
@@ -128,7 +163,23 @@ const LoginPage = () => {
 											)
 										}
 										placeholder="Enter password"
-										className="w-full rounded-xl border border-zinc-700 bg-[#09090B] px-4 py-3 text-white outline-none transition focus:border-violet-500"
+										className="
+	w-full
+	rounded-xl
+	border
+	border-zinc-700
+	bg-[#09090B]
+	px-4
+	py-3
+	text-white
+	outline-none
+	transition-all
+	duration-200
+	hover:border-zinc-600
+	focus:border-violet-500
+	focus:shadow-lg
+	focus:shadow-violet-500/10
+"
 									/>
 								</div>
 
@@ -139,10 +190,24 @@ const LoginPage = () => {
 								)}
 
 								<div className="flex items-center justify-between text-sm">
-									<label className="flex items-center gap-2 text-zinc-400">
-										<input type="checkbox" />
-										Remember Me
-									</label>
+									<label className="flex items-center gap-3 text-sm text-zinc-400 cursor-pointer">
+
+	<input
+		type="checkbox"
+		className="
+			h-4
+			w-4
+			rounded
+			border-zinc-600
+			bg-[#09090B]
+			text-violet-600
+			focus:ring-violet-500
+		"
+	/>
+
+	<span>Remember Me</span>
+
+</label>
 
 									<button
 										type="button"
@@ -155,14 +220,29 @@ const LoginPage = () => {
 								<button
 									type="submit"
 									disabled={loading}
-									className="w-full rounded-xl bg-violet-600 py-3 font-medium transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-70"
+									className="
+	w-full
+	rounded-xl
+	bg-violet-600
+	py-3
+	font-medium
+	text-white
+	transition-all
+	duration-200
+	hover:bg-violet-500
+	hover:shadow-lg
+	hover:shadow-violet-500/20
+	disabled:cursor-not-allowed
+	disabled:opacity-70
+"
 								>
 									{loading
-										? "Signing In..."
+										? "Authenticating... almost there"
 										: "Sign In"}
 								</button>
 
 							</form>
+                            
 
 							<p className="mt-8 text-center text-zinc-400">
 								Don't have an account?{" "}
@@ -172,6 +252,20 @@ const LoginPage = () => {
 								>
 									Create Account
 								</Link>
+
+                                <div className="mt-8 rounded-xl border border-zinc-800 bg-[#09090B] p-4">
+	<p className="mb-2 text-xs uppercase tracking-wide text-zinc-500">
+		Test Account
+	</p>
+
+	<p className="text-sm text-zinc-300">
+		Email: test2@gmail.com
+	</p>
+
+	<p className="text-sm text-zinc-300">
+		Password: 12345678
+	</p>
+</div>
 							</p>
 
 						</div>

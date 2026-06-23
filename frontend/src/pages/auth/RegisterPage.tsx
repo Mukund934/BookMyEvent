@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import authService from "../../services/auth.service";
+import logo from "../../assets/BookMyEventLogo.png";
 
 const RegisterPage = () => {
 	const navigate = useNavigate();
@@ -36,13 +37,11 @@ const RegisterPage = () => {
 				password,
 			});
 
-			alert("Account created successfully");
-
 			navigate("/login");
 		} catch (error: any) {
 			setError(
 				error?.response?.data?.message ||
-				"Registration failed"
+					"Registration failed"
 			);
 		} finally {
 			setLoading(false);
@@ -52,98 +51,242 @@ const RegisterPage = () => {
 	return (
 		<div className="min-h-screen bg-[#09090B] text-white">
 			<div className="mx-auto flex min-h-screen max-w-7xl items-center justify-center px-6">
-				<div className="w-full max-w-xl rounded-3xl border border-zinc-800 bg-[#111113] p-8 md:p-10">
-					<h1 className="mb-2 text-3xl font-bold">
-						Create Account
-					</h1>
 
-					<p className="mb-8 text-zinc-400">
-						Get started with BookMyEvent
-					</p>
+				<div
+					className="
+						w-full
+						max-w-6xl
+						overflow-hidden
+						rounded-3xl
+						border
+						border-zinc-800
+						bg-[#111113]
+						lg:grid
+						lg:grid-cols-2
+						transition-all
+						duration-300
+						hover:border-violet-500/20
+						hover:shadow-2xl
+						hover:shadow-violet-500/5
+					"
+				>
 
-					<form
-						onSubmit={handleSubmit}
-						className="space-y-5"
-					>
-						<input
-							type="text"
-							placeholder="Full Name"
-							value={name}
-							onChange={(e) =>
-								setName(
-									e.target.value
-								)
-							}
-							className="w-full rounded-xl border border-zinc-700 bg-[#09090B] px-4 py-3 text-white outline-none transition focus:border-violet-500"
-							required
-						/>
+					<div className="hidden border-r border-zinc-800 p-12 lg:flex lg:flex-col lg:justify-center">
 
-						<input
-							type="email"
-							placeholder="Email Address"
-							value={email}
-							onChange={(e) =>
-								setEmail(
-									e.target.value
-								)
-							}
-							className="w-full rounded-xl border border-zinc-700 bg-[#09090B] px-4 py-3 text-white outline-none transition focus:border-violet-500"
-							required
-						/>
+						<div className="mb-6 flex items-center gap-3">
+							<img
+								src={logo}
+								alt="BookMyEvent"
+								className="h-14 w-14 rounded-[18px] object-cover"
+							/>
 
-						<input
-							type="password"
-							placeholder="Password"
-							value={password}
-							onChange={(e) =>
-								setPassword(
-									e.target.value
-								)
-							}
-							className="w-full rounded-xl border border-zinc-700 bg-[#09090B] px-4 py-3 text-white outline-none transition focus:border-violet-500"
-							required
-						/>
+							<span className="text-2xl font-bold">
+								BookMyEvent
+							</span>
+						</div>
 
-						<input
-							type="password"
-							placeholder="Confirm Password"
-							value={confirmPassword}
-							onChange={(e) =>
-								setConfirmPassword(
-									e.target.value
-								)
-							}
-							className="w-full rounded-xl border border-zinc-700 bg-[#09090B] px-4 py-3 text-white outline-none transition focus:border-violet-500"
-							required
-						/>
+						<h1 className="mb-4 text-4xl font-bold leading-tight">
+							Discover Events.
+							<br />
+							Book Instantly.
+							<br />
+							Manage Seamlessly.
+						</h1>
 
-						{error && (
-							<div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">
-								{error}
-							</div>
-						)}
+						<p className="mb-8 text-zinc-400">
+							Create your account and start
+							exploring events, managing bookings,
+							and building experiences.
+						</p>
 
-						<button
-							type="submit"
-							disabled={loading}
-							className="w-full rounded-xl bg-violet-600 py-3 font-medium transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-60"
-						>
-							{loading
-								? "Creating Account..."
-								: "Create Account"}
-						</button>
-					</form>
+						<div className="space-y-4 text-zinc-300">
+							<p>✓ Secure JWT Authentication</p>
+							<p>✓ Create & Manage Events</p>
+							<p>✓ Smart Booking Management</p>
+							<p>✓ Analytics Dashboard</p>
+						</div>
 
-					<p className="mt-8 text-center text-zinc-400">
-						Already have an account?{" "}
-						<Link
-							to="/login"
-							className="text-violet-400 hover:text-violet-300"
-						>
-							Sign In
-						</Link>
-					</p>
+					</div>
+
+					<div className="p-8 md:p-12">
+
+						<div className="mx-auto max-w-md">
+
+							<h2 className="mb-2 text-3xl font-bold">
+								Create Account
+							</h2>
+
+							<p className="mb-8 text-zinc-400">
+								Get started with BookMyEvent
+							</p>
+
+							<form
+								onSubmit={handleSubmit}
+								className="space-y-5"
+							>
+
+								<input
+									type="text"
+									autoComplete="name"
+									placeholder="Full Name"
+									value={name}
+									onChange={(e) =>
+										setName(e.target.value)
+									}
+									className="
+										w-full
+										rounded-xl
+										border
+										border-zinc-700
+										bg-[#09090B]
+										px-4
+										py-3
+										text-white
+										outline-none
+										transition-all
+										duration-200
+										hover:border-zinc-600
+										focus:border-violet-500
+										focus:shadow-lg
+										focus:shadow-violet-500/10
+									"
+									required
+								/>
+
+								<input
+									type="email"
+									autoComplete="email"
+									placeholder="Email Address"
+									value={email}
+									onChange={(e) =>
+										setEmail(e.target.value)
+									}
+									className="
+										w-full
+										rounded-xl
+										border
+										border-zinc-700
+										bg-[#09090B]
+										px-4
+										py-3
+										text-white
+										outline-none
+										transition-all
+										duration-200
+										hover:border-zinc-600
+										focus:border-violet-500
+										focus:shadow-lg
+										focus:shadow-violet-500/10
+									"
+									required
+								/>
+
+								<input
+									type="password"
+									autoComplete="new-password"
+									placeholder="Password"
+									value={password}
+									onChange={(e) =>
+										setPassword(e.target.value)
+									}
+									className="
+										w-full
+										rounded-xl
+										border
+										border-zinc-700
+										bg-[#09090B]
+										px-4
+										py-3
+										text-white
+										outline-none
+										transition-all
+										duration-200
+										hover:border-zinc-600
+										focus:border-violet-500
+										focus:shadow-lg
+										focus:shadow-violet-500/10
+									"
+									required
+								/>
+
+								<input
+									type="password"
+									autoComplete="new-password"
+									placeholder="Confirm Password"
+									value={confirmPassword}
+									onChange={(e) =>
+										setConfirmPassword(
+											e.target.value
+										)
+									}
+									className="
+										w-full
+										rounded-xl
+										border
+										border-zinc-700
+										bg-[#09090B]
+										px-4
+										py-3
+										text-white
+										outline-none
+										transition-all
+										duration-200
+										hover:border-zinc-600
+										focus:border-violet-500
+										focus:shadow-lg
+										focus:shadow-violet-500/10
+									"
+									required
+								/>
+
+								{error && (
+									<div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">
+										{error}
+									</div>
+								)}
+
+								<button
+									type="submit"
+									disabled={loading}
+									className="
+										w-full
+										rounded-xl
+										bg-violet-600
+										py-3
+										font-medium
+										text-white
+										transition-all
+										duration-200
+										hover:bg-violet-500
+										hover:shadow-lg
+										hover:shadow-violet-500/20
+										disabled:cursor-not-allowed
+										disabled:opacity-70
+									"
+								>
+									{loading
+										? "Creating Account..."
+										: "Create Account"}
+								</button>
+
+							</form>
+
+							<p className="mt-8 text-center text-zinc-400">
+								Already have an account?{" "}
+								<Link
+									to="/login"
+									className="text-violet-400 transition hover:text-violet-300"
+								>
+									Sign In
+								</Link>
+							</p>
+
+						</div>
+
+					</div>
+
 				</div>
+
 			</div>
 		</div>
 	);

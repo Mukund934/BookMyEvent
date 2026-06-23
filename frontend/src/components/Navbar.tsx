@@ -27,7 +27,8 @@ const Navbar = () => {
 	};
 
 	return (
-		<header className="sticky top-0 z-50 border-b border-zinc-800 bg-[#09090B]/80 backdrop-blur">
+		<header className="sticky top-0 z-50 border-b border-zinc-800 bg-[#09090B]/80 backdrop-blur-xl">
+            
 			<div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
 
 				<Link
@@ -57,22 +58,63 @@ const Navbar = () => {
 				<nav className="hidden items-center gap-8 md:flex">
 					<Link
 						to="/events"
-						className="text-zinc-400 transition hover:text-white"
+							className="
+		flex
+		items-center
+		gap-3
+		rounded-xl
+		border
+		border-zinc-800
+		bg-[#111113]
+		px-3
+		py-2
+		transition-all
+		duration-200
+		hover:border-violet-300
+        hover:text-violet-500/60
+	"
 					>
 						Events
 					</Link>
 
 					<Link
 						to="/bookings"
-						className="text-zinc-400 transition hover:text-white"
+						className="
+		flex
+		items-center
+		gap-7
+		rounded-xl
+		border
+		border-zinc-800
+		bg-[#111113]
+		px-3
+		py-2
+		transition-all
+		duration-200
+		hover:border-violet-300
+        hover:text-violet-500/60
+	"
 					>
 						My Bookings
 					</Link>
 
 					<Link
 						to="/dashboard"
-						className="text-zinc-400 transition hover:text-white"
-					>
+className="
+		flex
+		items-center
+		gap-3
+		rounded-xl
+		border
+		border-zinc-800
+		bg-[#111113]
+		px-3
+		py-2
+		transition-all
+		duration-200
+		hover:border-violet-300
+        hover:text-violet-500/60
+	"					>
 						Dashboard
 					</Link>
 				</nav>
@@ -83,40 +125,96 @@ const Navbar = () => {
 						<>
 							<div className="flex items-center gap-3 rounded-xl border border-zinc-800 bg-[#111113] px-3 py-2">
 
-								<div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-600 text-sm font-semibold text-white">
+								<div className="
+	flex
+	h-9
+	w-9
+	items-center
+	justify-center
+	rounded-full
+	bg-gradient-to-br
+	from-violet-500
+	to-violet-700
+	text-sm
+	font-semibold
+	text-white
+">
 									{parsedUser.name
 										?.charAt(0)
 										.toUpperCase()}
 								</div>
 
-								<span className="hidden text-sm text-zinc-300 md:block">
-									{parsedUser.name}
-								</span>
+								<div className="hidden md:block">
+	<p className="text-sm font-medium text-white">
+		{parsedUser.name}
+	</p>
+
+	<p className="text-xs text-zinc-500">
+		Member
+	</p>
+</div>
 
 							</div>
 
 							<button
 								onClick={handleLogout}
-								className="rounded-xl border border-zinc-700 px-4 py-2 text-sm text-zinc-300 transition hover:border-zinc-600 hover:text-white"
+								className="
+	rounded-xl
+	border
+	border-zinc-800
+	bg-[#111113]
+	px-4
+	py-2
+	text-sm
+	text-zinc-400
+	transition-all
+	duration-200
+	hover:border-red-300
+	hover:text-red-400
+"
 							>
 								Logout
 							</button>
 						</>
 					) : (
 						<>
-							<Link
-								to="/login"
-								className="text-sm text-zinc-300 transition hover:text-white"
-							>
-								Login
-							</Link>
+							
+<div className="flex flex-col items-end">
+	<Link
+		to="/register"
+		className="
+			rounded-xl
+			bg-violet-600
+			px-5
+			py-2.5
+			text-sm
+			font-medium
+			text-white
+			transition-all
+			duration-200
+			hover:bg-violet-500
+			hover:shadow-lg
+			hover:shadow-violet-500/20
+		"
+	>
+		Get Started
+	</Link>
 
-							<Link
-								to="/register"
-								className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-500"
-							>
-								Get Started
-							</Link>
+	<Link
+		to="/login"
+		className="
+			mt-1
+			text-xs
+			text-zinc-500
+			transition
+			hover:text-violet-400
+		"
+	>
+		Already a member? Sign in
+	</Link>
+</div>
+
+                            
 						</>
 					)}
 

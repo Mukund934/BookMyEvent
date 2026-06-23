@@ -28,3 +28,4 @@ export interface RegisterResponse {
 	message: string;
 	user: User;
 }
+

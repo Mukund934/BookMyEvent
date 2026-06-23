@@ -5,6 +5,7 @@ import bookingService from "../../services/booking.service";
 
 import type { Booking } from "../../types/booking.types";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 const MyBookingsPage = () => {
 	const [bookings, setBookings] = useState<Booking[]>([]);
@@ -54,7 +55,13 @@ const MyBookingsPage = () => {
 		return (
 			<Layout>
 				<div className="mx-auto max-w-7xl px-6 py-20">
-					<p className="text-zinc-400">Loading bookings...</p>
+					<div className="flex items-center justify-center">
+						<div className="rounded-xl border border-zinc-800 bg-[#111113] px-6 py-4">
+							<p className="text-zinc-400">
+								Loading your bookings...
+							</p>
+						</div>
+					</div>
 				</div>
 			</Layout>
 		);
@@ -69,24 +76,73 @@ const MyBookingsPage = () => {
 					</h1>
 
 					<p className="mt-3 text-zinc-400">
-						Manage your event reservations.
+						View, manage and cancel your event reservations.
+					</p>
+					<p className="mt-4 text-sm text-zinc-500">
+						{bookings.length} Booking
+						{bookings.length !== 1 ? "s" : ""} Found
 					</p>
 				</div>
 
 				{bookings.length === 0 ? (
-					<div className="rounded-2xl border border-zinc-800 bg-[#111113] p-10 text-center">
-						<p className="text-zinc-400">No bookings found.</p>
+					<div className="rounded-2xl border border-zinc-800 bg-[#111113] p-12 text-center">
+						<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-violet-500/10 text-3xl">
+							🎟️
+						</div>
+
+						<h2 className="text-xl font-semibold text-white">
+							No bookings yet
+						</h2>
+
+						<p className="mt-3 text-zinc-400">
+							Explore upcoming events and reserve your first seat.
+						</p>
+
+						<Link
+							to="/events"
+							className="
+		mt-6
+		inline-flex
+		rounded-xl
+		bg-violet-600
+		px-5
+		py-3
+		text-sm
+		font-medium
+		text-white
+		transition-all
+		duration-200
+		hover:bg-violet-500
+		hover:shadow-lg
+		hover:shadow-violet-500/20
+	"
+						>
+							Browse Events
+						</Link>
 					</div>
 				) : (
 					<div className="space-y-6">
 						{bookings.map((booking) => (
 							<div
 								key={booking._id}
-								className="rounded-2xl border border-zinc-800 bg-[#111113] p-6 transition hover:border-zinc-700"
+								className="
+	group
+	rounded-2xl
+	border
+	border-zinc-800
+	bg-[#111113]
+	p-6
+	transition-all
+	duration-200
+	hover:-translate-y-1
+	hover:border-violet-500/20
+	hover:shadow-lg
+	hover:shadow-violet-500/5
+"
 							>
 								<div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
 									<div>
-										<h2 className="text-xl font-semibold text-white">
+										<h2 className="text-xl font-semibold tracking-tight text-white">
 											{booking.event.title}
 										</h2>
 
@@ -108,7 +164,7 @@ const MyBookingsPage = () => {
 												Seats
 											</p>
 
-											<p className="font-medium text-white">
+											<p className="text-lg font-semibold text-white">
 												{booking.seatsBooked}
 											</p>
 										</div>
@@ -118,7 +174,7 @@ const MyBookingsPage = () => {
 												Amount
 											</p>
 
-											<p className="font-medium text-white">
+											<p className="text-lg font-semibold text-violet-400">
 												₹{booking.totalAmount}
 											</p>
 										</div>
@@ -145,7 +201,20 @@ const MyBookingsPage = () => {
 															booking._id,
 														)
 													}
-													className="mt-3 rounded-lg bg-red-600 px-4 py-2 text-sm text-white transition hover:bg-red-500"
+													className="
+	mt-3
+	rounded-lg
+	bg-red-600
+	px-4
+	py-2
+	text-sm
+	text-white
+	transition-all
+	duration-200
+	hover:bg-red-500
+	hover:shadow-lg
+	hover:shadow-red-500/20
+"
 												>
 													Cancel Booking
 												</button>
