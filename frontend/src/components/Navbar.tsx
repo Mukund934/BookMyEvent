@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import logo from "../assets/BookMyEventLogo.png";
 
 const Navbar = () => {
 	const token = localStorage.getItem(
@@ -33,9 +34,20 @@ const Navbar = () => {
 					to="/"
 					className="flex items-center gap-3"
 				>
-					<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 font-bold text-white">
-						B
-					</div>
+<Link
+	to="/"
+	className="flex items-center gap-3"
+>
+	<img
+		src={logo}
+		alt="BookMyEvent"
+		className="h-20 w-20 rounded-[30px] object-cover"
+	/>
+
+	<span className="text-2xl font-bold text-white">
+		
+	</span>
+</Link>
 
 					<span className="text-xl font-bold text-white">
 						BookMyEvent

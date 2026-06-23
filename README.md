@@ -1,5 +1,12 @@
-# 🎟️ BookMyEvent
+<div align="center">
 
+<img src="./frontend/src/assets/BookMyEventLogo.png" alt="BookMyEvent Logo" width="280"/>
+
+#  BookMyEvent
+
+A modern full-stack Event Booking Platform built with React, TypeScript, Node.js, Express, MongoDB, Redis, and JWT Authentication.
+
+</div>
 <div align="center">
 
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge\&logo=nodedotjs\&logoColor=white)
