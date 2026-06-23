@@ -2,7 +2,6 @@
 
 <img src="./frontend/src/assets/BookMyEventLogo.png" alt="BookMyEvent Logo" width="280"/>
 
-#  BookMyEvent
 
 A modern full-stack Event Booking Platform built with React, TypeScript, Node.js, Express, MongoDB, Redis, and JWT Authentication.
 
