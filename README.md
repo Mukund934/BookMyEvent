@@ -35,34 +35,50 @@ Designed as part of a Full Stack Developer Internship Assessment while focusing 
 
 ## 📸 Preview
 
-### Home Page
+### 🏠 Landing Page
 
 <p align="center">
-<img src="./assets/screenshots/home.png" width="90%">
+  <img src="./frontend/public/home.png" width="90%" alt="Landing Page">
 </p>
 
 ---
 
-### Event Listing
+### 🎫 Discover Events
 
 <p align="center">
-<img src="./assets/screenshots/events.png" width="90%">
+  <img src="./frontend/public/events.png" width="90%" alt="Events Listing">
 </p>
 
 ---
 
-### Event Details
+### 🎪 Event Details & Seat Availability
 
 <p align="center">
-<img src="./assets/screenshots/event-details.png" width="90%">
+  <img src="./frontend/public/insideOneEvent.png" width="90%" alt="Event Details">
 </p>
 
 ---
 
-### Dashboard Analytics
+### 🛒 Booking Workflow
 
 <p align="center">
-<img src="./assets/screenshots/dashboard.png" width="90%">
+  <img src="./frontend/public/insideOneEvent1.png" width="90%" alt="Booking Workflow">
+</p>
+
+---
+
+### 📊 Dashboard Analytics
+
+<p align="center">
+  <img src="./frontend/public/dashboard.png" width="90%" alt="Dashboard Analytics">
+</p>
+
+---
+
+### 📋 My Bookings
+
+<p align="center">
+  <img src="./frontend/public/myBookings.png" width="90%" alt="My Bookings">
 </p>
 
 ---
