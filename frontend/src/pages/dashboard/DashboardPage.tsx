@@ -5,6 +5,8 @@ import EmptyState from "../../components/EmptyState";
 import ErrorState from "../../components/ErrorState";
 import Skeleton from "../../components/Skeleton";
 import Card from "../../components/Card";
+import BarChart from "../../components/BarChart";
+import TrendChart from "../../components/TrendChart";
 
 import dashboardService from "../../services/dashboard.service";
 import { Link } from "react-router-dom";
@@ -115,6 +117,21 @@ const DashboardPage = () => {
 		);
 	}
 
+	const MONTHS = [
+		"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+		"Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+	];
+
+	const trendPoints = data.monthlyTrends.map((entry) => ({
+		label: `${MONTHS[entry._id.month - 1]}`,
+		value: entry.totalBookings,
+		detail: `${MONTHS[entry._id.month - 1]} ${entry._id.year}: ${
+			entry.totalBookings
+		} booking${entry.totalBookings === 1 ? "" : "s"}, ${formatCurrency(
+			entry.revenue,
+		)}`,
+	}));
+
 	return (
 		<Layout>
 			<div className="mx-auto max-w-7xl px-6 py-10">
@@ -181,14 +198,35 @@ const DashboardPage = () => {
 					))}
 				</div>
 
-				<div className="mt-10 rounded-2xl border border-zinc-800 bg-[#111113] p-6 transition-all duration-200 hover:border-zinc-700 hover:-translate-y-1">
-					<div className="mb-6 flex items-center justify-between">
+				<Card className="mt-10 p-6">
+					<div className="mb-6 flex flex-wrap items-center justify-between gap-2">
+						<h2 className="text-2xl font-bold text-white">
+							Booking Trend
+						</h2>
+
+						<span className="text-sm text-zinc-500">
+							Bookings per month
+						</span>
+					</div>
+
+					{trendPoints.length === 0 ? (
+						<p className="py-10 text-center text-zinc-500">
+							Booking activity will appear here once your events start
+							selling.
+						</p>
+					) : (
+						<TrendChart points={trendPoints} />
+					)}
+				</Card>
+
+				<Card className="mt-10 p-6">
+					<div className="mb-6 flex flex-wrap items-center justify-between gap-2">
 						<h2 className="text-2xl font-bold text-white">
 							Top Events
 						</h2>
 
 						<span className="text-sm text-zinc-500">
-							Best Performing Events
+							By revenue
 						</span>
 					</div>
 
@@ -207,49 +245,18 @@ const DashboardPage = () => {
 							}
 						/>
 					) : (
-						<div className="space-y-4">
-							{data.topEvents.map((event) => (
-								<div
-									key={event._id}
-									className="
-		flex
-		items-center
-		justify-between
-		rounded-xl
-		border
-		border-zinc-800
-		p-4
-		transition-all
-		duration-200
-		hover:border-zinc-700
-		hover:bg-zinc-900/40
-        hover:border-violet-500/20
-
-		hover:shadow-lg
-
-		hover:shadow-violet-500/5
-	"
-								>
-									<div>
-										<h3 className="font-semibold text-white">
-											{event.title}
-										</h3>
-									</div>
-
-									<div className="text-right">
-										<p className="font-semibold text-violet-400">
-											{formatCurrency(event.revenue)}
-										</p>
-
-										<p className="text-sm text-zinc-500">
-											Revenue
-										</p>
-									</div>
-								</div>
-							))}
-						</div>
+						<BarChart
+							format={formatCurrency}
+							bars={data.topEvents.map((event) => ({
+								label: event.title,
+								value: event.revenue,
+								caption: `${event.bookings} booking${
+									event.bookings === 1 ? "" : "s"
+								}`,
+							}))}
+						/>
 					)}
-				</div>
+				</Card>
 			</div>
 		</Layout>
 	);
