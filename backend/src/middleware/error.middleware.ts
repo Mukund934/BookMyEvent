@@ -7,12 +7,13 @@ const errorMiddleware = (
 	res: Response,
 	next: NextFunction,
 ) => {
-	console.error("\n========== ERROR ==========");
-	console.error("Message:", err?.message);
-	console.error("Name:", err?.name);
-	console.error("Stack:", err?.stack);
-	console.error("Full Error:", err);
-	console.error("===========================\n");
+	console.error(
+		`[${req.method} ${req.originalUrl}] ${err?.name}: ${err?.message}`,
+	);
+
+	if (process.env.NODE_ENV !== "production") {
+		console.error(err?.stack);
+	}
 
 	let error = err;
 

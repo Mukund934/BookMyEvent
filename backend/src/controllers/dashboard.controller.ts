@@ -219,20 +219,12 @@ export const getDashboardOverview = asyncHandler(
 		const cached = await redis.get(cacheKey);
 
 		if (cached) {
-			console.log(
-				`[REDIS HIT] Dashboard -> ${req.user.userId}`,
-			);
-
 			return res.status(200).json({
 				success: true,
 				source: "cache",
 				data: JSON.parse(cached),
 			});
 		}
-
-		console.log(
-			`[REDIS MISS] Dashboard -> ${req.user.userId}`,
-		);
 
 		const organizerId = new mongoose.Types.ObjectId(
 			req.user.userId,
@@ -336,10 +328,6 @@ export const getDashboardOverview = asyncHandler(
 			JSON.stringify(responseData),
 			"EX",
 			300,
-		);
-
-		console.log(
-			`[REDIS STORE] ${cacheKey}`,
 		);
 
 		res.status(200).json({
