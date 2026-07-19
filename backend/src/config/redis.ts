@@ -1,14 +1,67 @@
 import Redis from "ioredis";
 
 
-const redis = new Redis(process.env.REDIS_URL as string);
+const client = new Redis(process.env.REDIS_URL as string, {
+    maxRetriesPerRequest: 2,
+});
 
-redis.on("connect", () => {
+client.on("connect", () => {
     console.log("Redis Connected");
 });
 
-redis.on("error", (err) => {
+client.on("error", (err) => {
     console.error("Redis Error:", err);
 });
+
+const redis = {
+    get: async (key: string): Promise<string | null> => {
+        try {
+            return await client.get(key);
+        } catch {
+            return null;
+        }
+    },
+
+    set: async (
+        key: string,
+        value: string,
+        mode: "EX",
+        ttl: number,
+    ): Promise<void> => {
+        try {
+            await client.set(key, value, mode, ttl);
+        } catch {
+            return;
+        }
+    },
+
+    setex: async (
+        key: string,
+        seconds: number,
+        value: string,
+    ): Promise<void> => {
+        try {
+            await client.setex(key, seconds, value);
+        } catch {
+            return;
+        }
+    },
+
+    del: async (...keys: string[]): Promise<void> => {
+        try {
+            await client.del(...keys);
+        } catch {
+            return;
+        }
+    },
+
+    keys: async (pattern: string): Promise<string[]> => {
+        try {
+            return await client.keys(pattern);
+        } catch {
+            return [];
+        }
+    },
+};
 
 export default redis;
