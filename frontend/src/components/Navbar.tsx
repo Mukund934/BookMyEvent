@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import logo from "../assets/BookMyEventLogo.png";
 
 const Navbar = () => {
+	const [menuOpen, setMenuOpen] =
+		useState(false);
+
 	const token = localStorage.getItem(
 		"bookmyevent_token"
 	);
@@ -209,13 +213,67 @@ className="
 	</Link>
 </div>
 
-                            
+
 						</>
 					)}
+
+					<button
+						onClick={() =>
+							setMenuOpen(!menuOpen)
+						}
+						aria-label="Toggle navigation"
+						aria-expanded={menuOpen}
+						className="
+		rounded-xl
+		border
+		border-zinc-800
+		bg-[#111113]
+		px-3
+		py-2
+		text-zinc-400
+		transition-all
+		duration-200
+		hover:border-violet-300
+		hover:text-violet-400
+		md:hidden
+	"
+					>
+						{menuOpen ? "✕" : "☰"}
+					</button>
 
 				</div>
 
 			</div>
+
+			{menuOpen && (
+				<nav className="border-t border-zinc-800 bg-[#09090B] px-6 py-4 md:hidden">
+					<div className="flex flex-col gap-3">
+						<Link
+							to="/events"
+							onClick={() => setMenuOpen(false)}
+							className="rounded-xl border border-zinc-800 bg-[#111113] px-3 py-2 text-zinc-300 transition-all duration-200 hover:border-violet-300 hover:text-violet-400"
+						>
+							Events
+						</Link>
+
+						<Link
+							to="/bookings"
+							onClick={() => setMenuOpen(false)}
+							className="rounded-xl border border-zinc-800 bg-[#111113] px-3 py-2 text-zinc-300 transition-all duration-200 hover:border-violet-300 hover:text-violet-400"
+						>
+							My Bookings
+						</Link>
+
+						<Link
+							to="/dashboard"
+							onClick={() => setMenuOpen(false)}
+							className="rounded-xl border border-zinc-800 bg-[#111113] px-3 py-2 text-zinc-300 transition-all duration-200 hover:border-violet-300 hover:text-violet-400"
+						>
+							Dashboard
+						</Link>
+					</div>
+				</nav>
+			)}
 		</header>
 	);
 };
