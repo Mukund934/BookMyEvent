@@ -5,6 +5,8 @@ export interface IEvent extends Document {
 	description: string;
 	date: Date;
 	location: string;
+	category: string;
+	imageUrl?: string;
 	price: number;
 	totalSeats: number;
 	availableSeats: number;
@@ -31,6 +33,23 @@ const eventSchema = new Schema<IEvent>(
 			type: String,
 			required: true,
 		},
+		category: {
+			type: String,
+			enum: [
+				"Music",
+				"Sports",
+				"Technology",
+				"Business",
+				"Arts",
+				"Food",
+				"Other",
+			],
+			default: "Other",
+		},
+		imageUrl: {
+			type: String,
+			default: "",
+		},
 		price: {
 			type: Number,
 			required: true,
@@ -55,6 +74,7 @@ const eventSchema = new Schema<IEvent>(
 );
 
 eventSchema.index({ organizer: 1 });
+eventSchema.index({ category: 1 });
 eventSchema.index({ date: 1 });
 eventSchema.index({ createdAt: -1 });
 

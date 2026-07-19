@@ -23,8 +23,16 @@ export const createEvent = asyncHandler(
 			throw new ApiError(401, "Unauthorized");
 		}
 
-		const { title, description, date, location, price, totalSeats } =
-			req.body;
+		const {
+			title,
+			description,
+			date,
+			location,
+			price,
+			totalSeats,
+			category,
+			imageUrl,
+		} = req.body;
 
 		if (
 			!title ||
@@ -49,6 +57,8 @@ export const createEvent = asyncHandler(
 			price: Number(price),
 			totalSeats: Number(totalSeats),
 			availableSeats: Number(totalSeats),
+			category: category || "Other",
+			imageUrl: imageUrl || "",
 			organizer: req.user.userId,
 		});
 
@@ -70,7 +80,7 @@ export const getAllEvents = asyncHandler(
 		const limit = Math.min(50, Number(req.query.limit) || 10);
 		const skip = (page - 1) * limit;
 
-		const { location, date, search } = req.query;
+		const { location, date, search, category } = req.query;
 
 		const filter: any = {};
 
@@ -79,6 +89,10 @@ export const getAllEvents = asyncHandler(
 				$regex: escapeRegex(location),
 				$options: "i",
 			};
+		}
+
+		if (category && typeof category === "string") {
+			filter.category = category;
 		}
 
 		if (search && typeof search === "string") {
@@ -104,7 +118,7 @@ export const getAllEvents = asyncHandler(
 
 		const version = await getCacheVersion("events");
 
-		const cacheKey = `events:${version}:${page}:${limit}:${location || "all"}:${date || "all"}:${search || "all"}`;
+		const cacheKey = `events:${version}:${page}:${limit}:${location || "all"}:${date || "all"}:${search || "all"}:${category || "all"}`;
 
 		const cached = await redis.get(cacheKey);
 
@@ -284,8 +298,16 @@ export const updateEvent = asyncHandler(
 			throw new ApiError(403, "Forbidden");
 		}
 
-		const { title, description, date, location, price, totalSeats } =
-			req.body;
+		const {
+			title,
+			description,
+			date,
+			location,
+			price,
+			totalSeats,
+			category,
+			imageUrl,
+		} = req.body;
 
 		if (totalSeats != null) {
 			const bookedSeats = event.totalSeats - event.availableSeats;
@@ -306,6 +328,8 @@ export const updateEvent = asyncHandler(
 		if (location != null) event.location = location;
 		if (date != null) event.date = date;
 		if (price != null) event.price = Number(price);
+		if (category != null) event.category = category;
+		if (imageUrl != null) event.imageUrl = imageUrl;
 
 		await event.save();
 
