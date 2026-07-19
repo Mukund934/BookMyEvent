@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 
 import Layout from "../../components/Layout";
+import EmptyState from "../../components/EmptyState";
+import ErrorState from "../../components/ErrorState";
+import Skeleton from "../../components/Skeleton";
 
 import dashboardService from "../../services/dashboard.service";
 import { Link } from "react-router-dom";
@@ -12,26 +15,79 @@ const DashboardPage = () => {
 
 	const [loading, setLoading] = useState(true);
 
+	const [failed, setFailed] = useState(false);
+
+	const [reloadToken, setReloadToken] = useState(0);
+
 	useEffect(() => {
+		let active = true;
+
 		const fetchDashboard = async () => {
 			try {
 				const response = await dashboardService.getOverview();
 
+				if (!active) return;
+
 				setData(response.data);
+
+				setFailed(false);
 			} catch (error) {
 				console.error(error);
+
+				if (active) {
+					setFailed(true);
+				}
 			} finally {
-				setLoading(false);
+				if (active) {
+					setLoading(false);
+				}
 			}
 		};
 
 		fetchDashboard();
-	}, []);
+
+		return () => {
+			active = false;
+		};
+	}, [reloadToken]);
+
+	const handleRetry = () => {
+		setLoading(true);
+
+		setFailed(false);
+
+		setReloadToken((token) => token + 1);
+	};
 
 	if (loading) {
 		return (
 			<Layout>
-				<div className="p-10 text-white">Loading dashboard...</div>
+				<div className="mx-auto max-w-7xl px-6 py-10">
+					<Skeleton className="h-12 w-64" />
+
+					<div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+						{[0, 1, 2, 3].map((placeholder) => (
+							<Skeleton
+								key={placeholder}
+								className="h-32 rounded-2xl"
+							/>
+						))}
+					</div>
+				</div>
+			</Layout>
+		);
+	}
+
+	if (failed) {
+		return (
+			<Layout>
+				<div className="mx-auto max-w-7xl px-6 py-10">
+					<ErrorState
+						title="Could not load your dashboard"
+						description="Your analytics are temporarily unavailable. Check your connection and try again."
+						onRetry={handleRetry}
+					/>
+				</div>
 			</Layout>
 		);
 	}
@@ -39,7 +95,21 @@ const DashboardPage = () => {
 	if (!data) {
 		return (
 			<Layout>
-				<div className="p-10 text-white">No data found.</div>
+				<div className="mx-auto max-w-7xl px-6 py-10">
+					<EmptyState
+						icon="📊"
+						title="No dashboard data yet"
+						description="Publish your first event to start tracking revenue, bookings and performance."
+						action={
+							<Link
+								to="/dashboard/create"
+								className="inline-flex rounded-xl bg-violet-600 px-5 py-3 text-sm font-medium text-white transition-all duration-200 hover:bg-violet-500 hover:shadow-lg hover:shadow-violet-500/20"
+							>
+								Create Event
+							</Link>
+						}
+					/>
+				</div>
 			</Layout>
 		);
 	}
