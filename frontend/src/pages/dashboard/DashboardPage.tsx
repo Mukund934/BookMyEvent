@@ -119,7 +119,7 @@ const DashboardPage = () => {
 			<div className="mx-auto max-w-7xl px-6 py-10">
 				<div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
 					<div>
-						<h1 className="text-5xl tracking-tight font-bold tracking-tight text-white">
+						<h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl">
 							Dashboard
 						</h1>
 
@@ -261,27 +261,19 @@ const DashboardPage = () => {
 					</div>
 
 					{data.topEvents.length === 0 ? (
-						<div className="rounded-xl border border-dashed border-zinc-700 p-10 text-center">
-							<div className="rounded-xl border border-dashed border-zinc-700 p-12 text-center">
-								<div className="mb-4 text-4xl"></div>
-
-								<h3 className="text-lg font-semibold text-white">
-									No analytics available yet
-								</h3>
-
-								<p className="mt-3 text-zinc-400">
-									Create your first event and start collecting
-									booking insights.
-								</p>
-
+						<EmptyState
+							icon="📈"
+							title="No analytics available yet"
+							description="Publish your first event and booking insights will appear here."
+							action={
 								<Link
 									to="/dashboard/create"
-									className="mt-6 inline-flex rounded-xl bg-violet-600 px-5 py-3 text-sm font-medium text-white transition-all duration-200 hover:bg-violet-500 hover:shadow-lg hover:shadow-violet-500/20"
+									className="inline-flex rounded-xl bg-violet-600 px-5 py-3 text-sm font-medium text-white transition-all duration-200 hover:bg-violet-500 hover:shadow-lg hover:shadow-violet-500/20"
 								>
-									+ Create Event
+									Create Event
 								</Link>
-							</div>
-						</div>
+							}
+						/>
 					) : (
 						<div className="space-y-4">
 							{data.topEvents.map((event) => (
