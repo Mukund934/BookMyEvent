@@ -54,9 +54,10 @@ const EventDetailsPage = () => {
 				console.error(error);
 
 				if (active) {
-					setFailed(
-						(error as AxiosError)?.response?.status !== 404,
-					);
+					const status = (error as AxiosError)?.response
+						?.status;
+
+					setFailed(!status || status >= 500);
 				}
 			} finally {
 				if (active) {
