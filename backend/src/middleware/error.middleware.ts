@@ -17,10 +17,15 @@ const errorMiddleware = (
 	let error = err;
 
 	if (!(error instanceof ApiError)) {
-		error = new ApiError(
-			500,
-			err?.message || "Internal Server Error",
-		);
+		if (err?.name === "ValidationError") {
+			error = new ApiError(400, "Invalid request data");
+		} else if (err?.name === "CastError") {
+			error = new ApiError(400, "Invalid identifier");
+		} else if (err?.code === 11000) {
+			error = new ApiError(409, "Resource already exists");
+		} else {
+			error = new ApiError(500, "Internal Server Error");
+		}
 	}
 
 	res.status(error.statusCode).json({
