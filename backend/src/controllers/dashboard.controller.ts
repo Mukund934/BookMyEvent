@@ -16,8 +16,7 @@ const getOrganizerMatch = (userId: string) => ({
 	"event.organizer": new mongoose.Types.ObjectId(userId),
 });
 
-const basePipeline = (userId: string) => [
-	{ $match: { status: "active" } },
+const organizerPipeline = (userId: string) => [
 	{
 		$lookup: {
 			from: "events",
@@ -30,6 +29,11 @@ const basePipeline = (userId: string) => [
 	{
 		$match: getOrganizerMatch(userId),
 	},
+];
+
+const basePipeline = (userId: string) => [
+	{ $match: { status: "active" } },
+	...organizerPipeline(userId),
 ];
 
 export const getTopEventsByRevenue = asyncHandler(
@@ -139,7 +143,7 @@ export const getCancellationStats = asyncHandler(
 		}
 
 		const stats = await Booking.aggregate([
-			...basePipeline(req.user.userId),
+			...organizerPipeline(req.user.userId),
 			{
 				$group: {
 					_id: "$status",
