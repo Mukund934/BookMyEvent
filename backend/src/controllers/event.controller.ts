@@ -157,7 +157,11 @@ export const getEventById = asyncHandler(
 );
 
 export const getEventAnalytics = asyncHandler(
-	async (req: Request, res: Response) => {
+	async (req: AuthRequest, res: Response) => {
+		if (!req.user) {
+			throw new ApiError(401, "Unauthorized");
+		}
+
 		const rawId = req.params.id;
 
 		if (!rawId || Array.isArray(rawId)) {
@@ -167,6 +171,14 @@ export const getEventAnalytics = asyncHandler(
 		const id = validateObjectId(rawId);
 
 		if (!id) throw new ApiError(400, "Invalid event id");
+
+		const event = await Event.findById(id);
+
+		if (!event) throw new ApiError(404, "Event not found");
+
+		if (event.organizer.toString() !== req.user.userId) {
+			throw new ApiError(403, "Forbidden");
+		}
 
 		const cacheKey = `analytics:${id}`;
 
@@ -178,10 +190,6 @@ export const getEventAnalytics = asyncHandler(
 				cached: true,
 			});
 		}
-
-		const event = await Event.findById(id);
-
-		if (!event) throw new ApiError(404, "Event not found");
 
 		const stats = await Booking.aggregate([
 			{
