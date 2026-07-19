@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { register, login } from "../../controllers/auth.controller";
+import {
+	register,
+	login,
+	forgotPassword,
+	resetPassword,
+} from "../../controllers/auth.controller";
 
 import { authRateLimit } from "../../middleware/authRateLimit";
 
@@ -66,4 +71,55 @@ router.post("/register", authRateLimit, register);
 
 
 router.post("/login", authRateLimit, login);
+
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Request a password reset link
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *     responses:
+ *       200:
+ *         description: Responds identically whether or not the account exists
+ */
+
+router.post("/forgot-password", authRateLimit, forgotPassword);
+
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: Set a new password using a reset token
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password updated successfully
+ *       400:
+ *         description: Token is invalid or has expired
+ */
+
+router.post("/reset-password", authRateLimit, resetPassword);
 export default router;
