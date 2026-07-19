@@ -10,6 +10,8 @@ export interface Event {
 	description: string;
 	date: string;
 	location: string;
+	category?: string;
+	imageUrl?: string;
 	price: number;
 	totalSeats: number;
 	availableSeats: number;

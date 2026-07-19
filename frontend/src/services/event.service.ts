@@ -10,6 +10,8 @@ export interface CreateEventRequest {
 	description: string;
 	date: string;
 	location: string;
+	category?: string;
+	imageUrl?: string;
 	price: number;
 	totalSeats: number;
 }
@@ -18,6 +20,7 @@ export interface EventQuery {
 	page?: number;
 	limit?: number;
 	search?: string;
+	category?: string;
 }
 
 class EventService {

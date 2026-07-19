@@ -1,5 +1,6 @@
 import type {
 	InputHTMLAttributes,
+	SelectHTMLAttributes,
 	TextareaHTMLAttributes,
 } from "react";
 
@@ -12,12 +13,16 @@ interface Props
 	id: string;
 	label: string;
 	multiline?: boolean;
+	options?: readonly string[];
+	hint?: string;
 }
 
 const FormField = ({
 	id,
 	label,
 	multiline,
+	options,
+	hint,
 	rows,
 	...rest
 }: Props) => {
@@ -30,7 +35,19 @@ const FormField = ({
 				{label}
 			</label>
 
-			{multiline ? (
+			{options ? (
+				<select
+					id={id}
+					className={controlClasses}
+					{...(rest as SelectHTMLAttributes<HTMLSelectElement>)}
+				>
+					{options.map((option) => (
+						<option key={option} value={option}>
+							{option}
+						</option>
+					))}
+				</select>
+			) : multiline ? (
 				<textarea
 					id={id}
 					rows={rows}
@@ -43,6 +60,12 @@ const FormField = ({
 					className={controlClasses}
 					{...rest}
 				/>
+			)}
+
+			{hint && (
+				<p className="mt-2 text-xs text-zinc-500">
+					{hint}
+				</p>
 			)}
 		</div>
 	);

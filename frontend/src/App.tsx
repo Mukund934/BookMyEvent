@@ -21,6 +21,9 @@ const DashboardPage = lazy(
 const CreateEventPage = lazy(
 	() => import("./pages/dashboard/CreateEventPage")
 );
+const EditEventPage = lazy(
+	() => import("./pages/dashboard/EditEventPage")
+);
 const NotFoundPage = lazy(() => import("./pages/notfound/NotFoundPage"));
 
 const RouteFallback = () => (
@@ -72,6 +75,15 @@ function App() {
 		element={
 			<ProtectedRoute>
 				<CreateEventPage />
+			</ProtectedRoute>
+		}
+	/>
+
+	<Route
+		path="/dashboard/events/:id/edit"
+		element={
+			<ProtectedRoute>
+				<EditEventPage />
 			</ProtectedRoute>
 		}
 	/>

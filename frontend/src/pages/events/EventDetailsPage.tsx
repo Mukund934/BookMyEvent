@@ -8,6 +8,8 @@ import Layout from "../../components/Layout";
 import EmptyState from "../../components/EmptyState";
 import ErrorState from "../../components/ErrorState";
 import Skeleton from "../../components/Skeleton";
+import Button from "../../components/Button";
+import authService from "../../services/auth.service";
 
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -33,6 +35,10 @@ const EventDetailsPage = () => {
 	const [failed, setFailed] = useState(false);
 
 	const [reloadToken, setReloadToken] = useState(0);
+
+	const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+	const [deleting, setDeleting] = useState(false);
 
 	useEffect(() => {
 		let active = true;
@@ -79,6 +85,28 @@ const EventDetailsPage = () => {
 		setFailed(false);
 
 		setReloadToken((token) => token + 1);
+	};
+
+	const handleDelete = async () => {
+		if (!event || deleting) return;
+
+		try {
+			setDeleting(true);
+
+			await eventService.deleteEvent(event._id);
+
+			toast.success("Event deleted successfully");
+
+			navigate("/dashboard");
+		} catch (error) {
+			toast.error(
+				getErrorMessage(error, "Failed to delete event"),
+			);
+		} finally {
+			setDeleting(false);
+
+			setConfirmingDelete(false);
+		}
 	};
 
 	const handleBooking = async () => {
@@ -173,6 +201,12 @@ const EventDetailsPage = () => {
 
 	const organizerName = organizer?.name || "Event Organizer";
 
+	const currentUser = authService.getUser();
+
+	const isOrganizer = Boolean(
+		organizer && currentUser && organizer._id === currentUser.id,
+	);
+
 	const organizerEmail = organizer?.email || "";
 
 	const totalPrice = event.price * tickets;
@@ -190,9 +224,57 @@ const EventDetailsPage = () => {
 								← Back to Events
 							</Link>
 
-							<h1 className="max-w-4xl text-5xl font-bold tracking-tight">
+							<h1 className="max-w-4xl text-4xl font-bold tracking-tight md:text-5xl">
 								{event.title}
 							</h1>
+
+							{isOrganizer && (
+								<div className="mt-5 flex flex-wrap items-center gap-3">
+									<Button
+										variant="secondary"
+										onClick={() =>
+											navigate(
+												`/dashboard/events/${event._id}/edit`,
+											)
+										}
+									>
+										Edit Event
+									</Button>
+
+									{confirmingDelete ? (
+										<>
+											<Button
+												variant="danger"
+												disabled={deleting}
+												onClick={handleDelete}
+											>
+												{deleting
+													? "Deleting..."
+													: "Confirm Delete"}
+											</Button>
+
+											<Button
+												variant="secondary"
+												disabled={deleting}
+												onClick={() =>
+													setConfirmingDelete(false)
+												}
+											>
+												Keep
+											</Button>
+										</>
+									) : (
+										<Button
+											variant="danger"
+											onClick={() =>
+												setConfirmingDelete(true)
+											}
+										>
+											Delete Event
+										</Button>
+									)}
+								</div>
+							)}
 
 							<p className="mt-4 max-w-2xl text-lg text-zinc-400">
 								{event.description}
