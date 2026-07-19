@@ -27,6 +27,9 @@ export const bookEvent = asyncHandler(
 
 		const session = await mongoose.startSession();
 
+		let booking;
+		let event;
+
 		try {
 			session.startTransaction();
 
@@ -42,7 +45,7 @@ export const bookEvent = asyncHandler(
 			}
 
 			// atomic seat decrement
-			const event = await Event.findOneAndUpdate(
+			event = await Event.findOneAndUpdate(
 				{
 					_id: eventId,
 					availableSeats: { $gte: seats },
@@ -56,7 +59,7 @@ export const bookEvent = asyncHandler(
 			}
 
 			// create booking
-			const booking = await Booking.create(
+			booking = await Booking.create(
 				[
 					{
 						user: req.user.userId,
@@ -70,35 +73,38 @@ export const bookEvent = asyncHandler(
 			);
 
 			await session.commitTransaction();
-
-			const keys = await redis.keys(`bookings:user:${req.user.userId}:*`);
-
-			if (keys.length) {
-				await redis.del(...keys);
-			}
-			await redis.del(`analytics:${eventId}`);
-
-			await redis.del(`event:${eventId}`);
-
-			const eventKeys = await redis.keys("events:*");
-
-			if (eventKeys.length) {
-				await redis.del(...eventKeys);
-			}
-
-			await redis.del(`dashboard:overview:${event.organizer}`);
-
-			res.status(201).json({
-				success: true,
-				message: "Booking successful",
-				data: booking[0],
-			});
 		} catch (error) {
-			await session.abortTransaction();
+			if (session.inTransaction()) {
+				await session.abortTransaction();
+			}
+
 			throw error;
 		} finally {
 			session.endSession();
 		}
+
+		const keys = await redis.keys(`bookings:user:${req.user.userId}:*`);
+
+		if (keys.length) {
+			await redis.del(...keys);
+		}
+		await redis.del(`analytics:${eventId}`);
+
+		await redis.del(`event:${eventId}`);
+
+		const eventKeys = await redis.keys("events:*");
+
+		if (eventKeys.length) {
+			await redis.del(...eventKeys);
+		}
+
+		await redis.del(`dashboard:overview:${event.organizer}`);
+
+		res.status(201).json({
+			success: true,
+			message: "Booking successful",
+			data: booking[0],
+		});
 	},
 );
 
@@ -167,10 +173,12 @@ export const cancelBooking = asyncHandler(
 
 		const session = await mongoose.startSession();
 
+		let booking;
+
 		try {
 			session.startTransaction();
 
-			const booking = await Booking.findById(bookingId).session(session);
+			booking = await Booking.findById(bookingId).session(session);
 
 			if (!booking) {
 				throw new ApiError(404, "Booking not found");
@@ -197,39 +205,42 @@ export const cancelBooking = asyncHandler(
 			await booking.save({ session });
 
 			await session.commitTransaction();
-
-			const keys = await redis.keys(`bookings:user:${req.user.userId}:*`);
-
-			if (keys.length) {
-				await redis.del(...keys);
-			}
-			await redis.del(`analytics:${booking.event}`);
-
-			await redis.del(`event:${booking.event}`);
-
-			const eventKeys = await redis.keys("events:*");
-
-			if (eventKeys.length) {
-				await redis.del(...eventKeys);
-			}
-
-			const eventDoc = await Event.findById(booking.event);
-
-			if (eventDoc) {
-				await redis.del(`dashboard:overview:${eventDoc.organizer}`);
-			}
-
-			res.status(200).json({
-				success: true,
-				message: "Booking cancelled successfully",
-				data: booking,
-			});
 		} catch (error) {
-			await session.abortTransaction();
+			if (session.inTransaction()) {
+				await session.abortTransaction();
+			}
+
 			throw error;
 		} finally {
 			session.endSession();
 		}
+
+		const keys = await redis.keys(`bookings:user:${req.user.userId}:*`);
+
+		if (keys.length) {
+			await redis.del(...keys);
+		}
+		await redis.del(`analytics:${booking.event}`);
+
+		await redis.del(`event:${booking.event}`);
+
+		const eventKeys = await redis.keys("events:*");
+
+		if (eventKeys.length) {
+			await redis.del(...eventKeys);
+		}
+
+		const eventDoc = await Event.findById(booking.event);
+
+		if (eventDoc) {
+			await redis.del(`dashboard:overview:${eventDoc.organizer}`);
+		}
+
+		res.status(200).json({
+			success: true,
+			message: "Booking cancelled successfully",
+			data: booking,
+		});
 	},
 );
 
