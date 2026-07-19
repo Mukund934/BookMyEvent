@@ -184,7 +184,10 @@ const LoginPage = () => {
 								</div>
 
 								{error && (
-									<div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">
+									<div
+										role="alert"
+										className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400"
+									>
 										{error}
 									</div>
 								)}
@@ -252,8 +255,9 @@ const LoginPage = () => {
 								>
 									Create Account
 								</Link>
+							</p>
 
-                                <div className="mt-8 rounded-xl border border-zinc-800 bg-[#09090B] p-4">
+							<div className="mt-8 rounded-xl border border-zinc-800 bg-[#09090B] p-4">
 	<p className="mb-2 text-xs uppercase tracking-wide text-zinc-500">
 		Test Account
 	</p>
@@ -266,7 +270,6 @@ const LoginPage = () => {
 		Password: 12345678
 	</p>
 </div>
-							</p>
 
 						</div>
 					</div>
