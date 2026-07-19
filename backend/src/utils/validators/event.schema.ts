@@ -10,3 +10,20 @@ export const createEventSchema = z.object({
     date: z.string(),
   }),
 });
+
+export const updateEventSchema = z.object({
+  body: z.object({
+    title: z
+      .string()
+      .min(3, "Title must be at least 3 characters")
+      .optional(),
+    description: z
+      .string()
+      .min(10, "Description too short")
+      .optional(),
+    location: z.string().min(2).optional(),
+    price: z.number().nonnegative().optional(),
+    totalSeats: z.number().positive().optional(),
+    date: z.string().optional(),
+  }),
+});

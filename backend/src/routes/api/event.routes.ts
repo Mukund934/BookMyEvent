@@ -2,6 +2,8 @@ import { Router } from "express";
 
 import {
 	createEvent,
+	updateEvent,
+	deleteEvent,
 	getAllEvents,
 	getEventById,
 	getEventAnalytics,
@@ -9,7 +11,10 @@ import {
 
 import { protect } from "../../middleware/auth.middleware";
 import validate from "../../middleware/validate";
-import { createEventSchema } from "../../utils/validators/event.schema";
+import {
+	createEventSchema,
+	updateEventSchema,
+} from "../../utils/validators/event.schema";
 
 const router = Router();
 
@@ -133,5 +138,71 @@ router.post("/create", protect, validate(createEventSchema), createEvent);
  */
 
 router.get("/:id/analytics", protect, getEventAnalytics);
+
+/**
+ * @swagger
+ * /events/{id}:
+ *   put:
+ *     summary: Update an event owned by the caller
+ *     tags:
+ *       - Events
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               date:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               totalSeats:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Event updated successfully
+ *       403:
+ *         description: Caller does not own the event
+ */
+
+router.put("/:id", protect, validate(updateEventSchema), updateEvent);
+
+/**
+ * @swagger
+ * /events/{id}:
+ *   delete:
+ *     summary: Delete an event owned by the caller
+ *     tags:
+ *       - Events
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Event deleted successfully
+ *       409:
+ *         description: Event still has active bookings
+ */
+
+router.delete("/:id", protect, deleteEvent);
 
 export default router;

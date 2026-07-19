@@ -244,3 +244,117 @@ export const getEventAnalytics = asyncHandler(
 		});
 	},
 );
+
+export const updateEvent = asyncHandler(
+	async (req: AuthRequest, res: Response) => {
+		if (!req.user) {
+			throw new ApiError(401, "Unauthorized");
+		}
+
+		const id = validateObjectId(req.params.id);
+
+		if (!id) {
+			throw new ApiError(400, "Invalid event id");
+		}
+
+		const event = await Event.findById(id);
+
+		if (!event) {
+			throw new ApiError(404, "Event not found");
+		}
+
+		if (event.organizer.toString() !== req.user.userId) {
+			throw new ApiError(403, "Forbidden");
+		}
+
+		const { title, description, date, location, price, totalSeats } =
+			req.body;
+
+		if (totalSeats != null) {
+			const bookedSeats = event.totalSeats - event.availableSeats;
+
+			if (Number(totalSeats) < bookedSeats) {
+				throw new ApiError(
+					400,
+					`Total seats cannot be below the ${bookedSeats} already booked`,
+				);
+			}
+
+			event.availableSeats = Number(totalSeats) - bookedSeats;
+			event.totalSeats = Number(totalSeats);
+		}
+
+		if (title != null) event.title = title;
+		if (description != null) event.description = description;
+		if (location != null) event.location = location;
+		if (date != null) event.date = date;
+		if (price != null) event.price = Number(price);
+
+		await event.save();
+
+		await redis.del(`event:${id}`);
+
+		await redis.del(`analytics:${id}`);
+
+		await bumpCacheVersion("events");
+
+		await bumpCacheVersion(`dashboard:${req.user.userId}`);
+
+		res.status(200).json({
+			success: true,
+			message: "Event updated successfully",
+			data: event,
+		});
+	},
+);
+
+export const deleteEvent = asyncHandler(
+	async (req: AuthRequest, res: Response) => {
+		if (!req.user) {
+			throw new ApiError(401, "Unauthorized");
+		}
+
+		const id = validateObjectId(req.params.id);
+
+		if (!id) {
+			throw new ApiError(400, "Invalid event id");
+		}
+
+		const event = await Event.findById(id);
+
+		if (!event) {
+			throw new ApiError(404, "Event not found");
+		}
+
+		if (event.organizer.toString() !== req.user.userId) {
+			throw new ApiError(403, "Forbidden");
+		}
+
+		const activeBookings = await Booking.countDocuments({
+			event: id,
+			status: "active",
+		});
+
+		if (activeBookings > 0) {
+			throw new ApiError(
+				409,
+				`Cannot delete an event with ${activeBookings} active booking(s)`,
+			);
+		}
+
+		await event.deleteOne();
+
+		await redis.del(`event:${id}`);
+
+		await redis.del(`analytics:${id}`);
+
+		await bumpCacheVersion("events");
+
+		await bumpCacheVersion(`dashboard:${req.user.userId}`);
+
+		res.status(200).json({
+			success: true,
+			message: "Event deleted successfully",
+		});
+	},
+);
