@@ -12,8 +12,16 @@ const MyBookingsPage = () => {
 
 	const [loading, setLoading] = useState(true);
 
+	const [confirmingId, setConfirmingId] = useState<string | null>(null);
+
+	const [cancellingId, setCancellingId] = useState<string | null>(null);
+
 	const handleCancelBooking = async (bookingId: string) => {
+		if (cancellingId) return;
+
 		try {
+			setCancellingId(bookingId);
+
 			await bookingService.cancelBooking(bookingId);
 
 			toast.success("Booking cancelled successfully");
@@ -32,6 +40,10 @@ const MyBookingsPage = () => {
 			toast.error(
 				error?.response?.data?.message || "Cancellation failed",
 			);
+		} finally {
+			setCancellingId(null);
+
+			setConfirmingId(null);
 		}
 	};
 
@@ -194,14 +206,50 @@ const MyBookingsPage = () => {
 												{booking.status}
 											</p>
 
-											{booking.status === "active" && (
-												<button
-													onClick={() =>
-														handleCancelBooking(
-															booking._id,
-														)
-													}
-													className="
+											{booking.status === "active" &&
+												(confirmingId === booking._id ? (
+													<div className="mt-3 flex items-center gap-2">
+														<button
+															onClick={() =>
+																handleCancelBooking(
+																	booking._id,
+																)
+															}
+															disabled={
+																cancellingId ===
+																booking._id
+															}
+															className="rounded-lg bg-red-600 px-4 py-2 text-sm text-white transition-all duration-200 hover:bg-red-500 hover:shadow-lg hover:shadow-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+														>
+															{cancellingId ===
+															booking._id
+																? "Cancelling..."
+																: "Confirm"}
+														</button>
+
+														<button
+															onClick={() =>
+																setConfirmingId(
+																	null,
+																)
+															}
+															disabled={
+																cancellingId ===
+																booking._id
+															}
+															className="rounded-lg border border-zinc-800 bg-[#111113] px-4 py-2 text-sm text-zinc-400 transition-all duration-200 hover:border-zinc-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+														>
+															Keep
+														</button>
+													</div>
+												) : (
+													<button
+														onClick={() =>
+															setConfirmingId(
+																booking._id,
+															)
+														}
+														className="
 	mt-3
 	rounded-lg
 	bg-red-600
@@ -215,10 +263,10 @@ const MyBookingsPage = () => {
 	hover:shadow-lg
 	hover:shadow-red-500/20
 "
-												>
-													Cancel Booking
-												</button>
-											)}
+													>
+														Cancel Booking
+													</button>
+												))}
 										</div>
 									</div>
 								</div>
