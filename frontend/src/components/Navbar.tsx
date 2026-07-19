@@ -10,9 +10,13 @@ const Navbar = () => {
 		"bookmyevent_user"
 	);
 
-	const parsedUser = user
-		? JSON.parse(user)
-		: null;
+	let parsedUser;
+
+	try {
+		parsedUser = user ? JSON.parse(user) : null;
+	} catch {
+		parsedUser = null;
+	}
 
 	const handleLogout = () => {
 		localStorage.removeItem(
@@ -35,22 +39,13 @@ const Navbar = () => {
 					to="/"
 					className="flex items-center gap-3"
 				>
-<Link
-	to="/"
-	className="flex items-center gap-3"
->
-	<img
-		src={logo}
-		alt="BookMyEvent"
-		className="h-20 w-20 rounded-[30px] object-cover"
-	/>
+					<img
+						src={logo}
+						alt="BookMyEvent"
+						className="h-20 w-20 rounded-[30px] object-cover"
+					/>
 
-	<span className="text-2xl font-bold text-white">
-		
-	</span>
-</Link>
-
-					<span className="text-xl font-bold text-white">
+					<span className="hidden text-xl font-bold text-white sm:block">
 						BookMyEvent
 					</span>
 				</Link>
