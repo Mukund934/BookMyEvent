@@ -1,21 +1,41 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import LandingPage from "./pages/landing/LandingPage";
-import LoginPage from "./pages/auth/LoginPage";
-import RegisterPage from "./pages/auth/RegisterPage";
-import EventsPage from "./pages/events/EventsPage";
-import EventDetailsPage from "./pages/events/EventDetailsPage";
-import MyBookingsPage from "./pages/bookings/MyBookingsPage";
 
 import ProtectedRoute from "./components/ProtectedRoute";
-import DashboardPage from "./pages/dashboard/DashboardPage";
-import CreateEventPage from "./pages/dashboard/CreateEventPage";
-import NotFoundPage from "./pages/notfound/NotFoundPage";
+import Skeleton from "./components/Skeleton";
+
+const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
+const RegisterPage = lazy(() => import("./pages/auth/RegisterPage"));
+const EventsPage = lazy(() => import("./pages/events/EventsPage"));
+const EventDetailsPage = lazy(
+	() => import("./pages/events/EventDetailsPage")
+);
+const MyBookingsPage = lazy(
+	() => import("./pages/bookings/MyBookingsPage")
+);
+const DashboardPage = lazy(
+	() => import("./pages/dashboard/DashboardPage")
+);
+const CreateEventPage = lazy(
+	() => import("./pages/dashboard/CreateEventPage")
+);
+const NotFoundPage = lazy(() => import("./pages/notfound/NotFoundPage"));
+
+const RouteFallback = () => (
+	<div className="min-h-screen bg-[#09090B] px-6 py-20">
+		<div className="mx-auto max-w-7xl">
+			<Skeleton className="h-10 w-56" />
+		</div>
+	</div>
+);
 
 function App() {
 	return (
 		<BrowserRouter>
-			<Routes>
+			<Suspense fallback={<RouteFallback />}>
+				<Routes>
 	<Route path="/" element={<LandingPage />} />
 
 	<Route path="/login" element={<LoginPage />} />
@@ -58,6 +78,7 @@ function App() {
 
 	<Route path="*" element={<NotFoundPage />} />
 </Routes>
+			</Suspense>
 		</BrowserRouter>
 	);
 }
