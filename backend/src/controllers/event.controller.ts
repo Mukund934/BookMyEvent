@@ -47,6 +47,14 @@ export const createEvent = asyncHandler(
 			organizer: req.user.userId,
 		});
 
+		const eventKeys = await redis.keys("events:*");
+
+		if (eventKeys.length) {
+			await redis.del(...eventKeys);
+		}
+
+		await redis.del(`dashboard:overview:${req.user.userId}`);
+
 		res.status(201).json({
 			success: true,
 			message: "Event created successfully",
