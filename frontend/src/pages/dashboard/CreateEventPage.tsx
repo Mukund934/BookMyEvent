@@ -29,17 +29,59 @@ const CreateEventPage = () => {
 		});
 	};
 
+	const validate = () => {
+		if (formData.title.trim().length < 3) {
+			return "Title must be at least 3 characters";
+		}
+
+		if (formData.description.trim().length < 10) {
+			return "Description must be at least 10 characters";
+		}
+
+		if (formData.location.trim().length < 2) {
+			return "Location must be at least 2 characters";
+		}
+
+		if (!formData.date) {
+			return "Date is required";
+		}
+
+		if (new Date(formData.date).getTime() <= Date.now()) {
+			return "Date must be in the future";
+		}
+
+		if (!formData.price || Number(formData.price) < 0) {
+			return "Price cannot be negative";
+		}
+
+		if (Number(formData.totalSeats) < 1) {
+			return "Total seats must be at least 1";
+		}
+
+		return null;
+	};
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+
+		if (loading) return;
+
+		const validationError = validate();
+
+		if (validationError) {
+			toast.error(validationError);
+
+			return;
+		}
 
 		try {
 			setLoading(true);
 
 			await eventService.createEvent({
-				title: formData.title,
-				description: formData.description,
+				title: formData.title.trim(),
+				description: formData.description.trim(),
 				date: formData.date,
-				location: formData.location,
+				location: formData.location.trim(),
 				price: Number(formData.price),
 				totalSeats: Number(formData.totalSeats),
 			});
@@ -85,6 +127,7 @@ const CreateEventPage = () => {
                     
 					<input
 						name="title"
+						required
 						placeholder="Event Title"
 						value={formData.title}
 						onChange={handleChange}
@@ -107,6 +150,7 @@ const CreateEventPage = () => {
 
 					<textarea
 						name="description"
+						required
 						placeholder="Description"
 						value={formData.description}
 						onChange={handleChange}
@@ -131,6 +175,7 @@ const CreateEventPage = () => {
 					<input
 						type="datetime-local"
 						name="date"
+						required
 						value={formData.date}
 						onChange={handleChange}
 						className="
@@ -152,6 +197,7 @@ const CreateEventPage = () => {
 
 					<input
 						name="location"
+						required
 						placeholder="Location"
 						value={formData.location}
 						onChange={handleChange}
@@ -176,6 +222,8 @@ const CreateEventPage = () => {
 					<input
 						type="number"
 						name="price"
+						required
+						min="0"
 						placeholder="Price"
 						value={formData.price}
 						onChange={handleChange}
@@ -199,6 +247,8 @@ const CreateEventPage = () => {
 					<input
 						type="number"
 						name="totalSeats"
+						required
+						min="1"
 						placeholder="Total Seats"
 						value={formData.totalSeats}
 						onChange={handleChange}
