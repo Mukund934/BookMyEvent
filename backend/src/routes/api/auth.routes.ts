@@ -34,7 +34,7 @@ const router = Router();
  *         description: User registered successfully
  */
 
-router.post("/register", register);
+router.post("/register", authRateLimit, register);
 
 
 /**
