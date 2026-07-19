@@ -14,11 +14,20 @@ export interface CreateEventRequest {
 	totalSeats: number;
 }
 
+export interface EventQuery {
+	page?: number;
+	limit?: number;
+	search?: string;
+}
+
 class EventService {
-	async getEvents() {
+	async getEvents(
+		query: EventQuery = {}
+	) {
 		const response =
 			await api.get<EventsResponse>(
-				"/events"
+				"/events",
+				{ params: query }
 			);
 
 		return response.data;
@@ -40,6 +49,28 @@ class EventService {
 			await api.post(
 				"/events/create",
 				data
+			);
+
+		return response.data;
+	}
+
+	async updateEvent(
+		id: string,
+		data: Partial<CreateEventRequest>
+	) {
+		const response =
+			await api.put(
+				`/events/${id}`,
+				data
+			);
+
+		return response.data;
+	}
+
+	async deleteEvent(id: string) {
+		const response =
+			await api.delete(
+				`/events/${id}`
 			);
 
 		return response.data;
