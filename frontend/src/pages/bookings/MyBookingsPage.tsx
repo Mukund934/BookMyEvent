@@ -10,6 +10,7 @@ import type { Booking } from "../../types/booking.types";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { formatCurrency, formatDateTime } from "../../utils/format";
+import { getErrorMessage } from "../../utils/error";
 
 const MyBookingsPage = () => {
 	const [bookings, setBookings] = useState<Booking[]>([]);
@@ -40,9 +41,9 @@ const MyBookingsPage = () => {
 						: booking,
 				),
 			);
-		} catch (error: any) {
+		} catch (error) {
 			toast.error(
-				error?.response?.data?.message || "Cancellation failed",
+				getErrorMessage(error, "Cancellation failed"),
 			);
 		} finally {
 			setCancellingId(null);

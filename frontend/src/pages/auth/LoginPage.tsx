@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../../assets/BookMyEventLogo.png";
+import { getErrorMessage } from "../../utils/error";
 import authService from "../../services/auth.service";
 
 const LoginPage = () => {
@@ -33,10 +34,12 @@ const LoginPage = () => {
 			});
 
 			navigate("/");
-		} catch (err: any) {
+		} catch (err) {
 			setError(
-				err?.response?.data?.message ||
-				"Login failed"
+				getErrorMessage(
+					err,
+					"Login failed"
+				)
 			);
 		} finally {
 			setLoading(false);

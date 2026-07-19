@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import type { AxiosError } from "axios";
 import { formatCurrency, formatDateTime, formatPrice } from "../../utils/format";
+import { getErrorMessage } from "../../utils/error";
 
 import bookingService from "../../services/booking.service";
 
@@ -105,8 +106,8 @@ const EventDetailsPage = () => {
 			toast.success(response.message || "Booking successful");
 
 			navigate("/bookings");
-		} catch (error: any) {
-			toast.error(error?.response?.data?.message || "Booking failed");
+		} catch (error) {
+			toast.error(getErrorMessage(error, "Booking failed"));
 		} finally {
 			setBookingLoading(false);
 		}

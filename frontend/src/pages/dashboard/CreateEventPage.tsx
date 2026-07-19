@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import Layout from "../../components/Layout";
 import FormField from "../../components/FormField";
+import { getErrorMessage } from "../../utils/error";
 import eventService from "../../services/event.service";
 
 import { toast } from "sonner";
@@ -90,9 +91,9 @@ const CreateEventPage = () => {
 			toast.success("Event created successfully");
 
 			navigate("/events");
-		} catch (error: any) {
+		} catch (error) {
 			toast.error(
-				error?.response?.data?.message || "Failed to create event",
+				getErrorMessage(error, "Failed to create event"),
 			);
 		} finally {
 			setLoading(false);

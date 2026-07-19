@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import authService from "../../services/auth.service";
 import logo from "../../assets/BookMyEventLogo.png";
+import { getErrorMessage } from "../../utils/error";
 
 const RegisterPage = () => {
 	const navigate = useNavigate();
@@ -38,10 +39,12 @@ const RegisterPage = () => {
 			});
 
 			navigate("/login");
-		} catch (error: any) {
+		} catch (error) {
 			setError(
-				error?.response?.data?.message ||
+				getErrorMessage(
+					error,
 					"Registration failed"
+				)
 			);
 		} finally {
 			setLoading(false);
