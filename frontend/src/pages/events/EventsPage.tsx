@@ -11,6 +11,8 @@ import EmptyState from "../../components/EmptyState";
 import ErrorState from "../../components/ErrorState";
 import Skeleton from "../../components/Skeleton";
 
+import Select from "../../components/Select";
+
 import { EVENT_CATEGORIES } from "../../utils/categories";
 
 const EventsPage = () => {
@@ -22,6 +24,7 @@ const EventsPage = () => {
 	const [search, setSearch] = useState("");
 	const [page, setPage] = useState(1);
 	const [category, setCategory] = useState("");
+	const [sort, setSort] = useState("newest");
 
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalEvents, setTotalEvents] = useState(0);
@@ -56,6 +59,7 @@ const EventsPage = () => {
 						page,
 						search: search || undefined,
 						category: category || undefined,
+						sort,
 					});
 
 				if (!active) return;
@@ -91,7 +95,7 @@ const EventsPage = () => {
 		return () => {
 			active = false;
 		};
-	}, [page, search, category, reloadToken]);
+	}, [page, search, category, sort, reloadToken]);
 
 	const handleRetry = () => {
 		setLoading(true);
@@ -129,60 +133,112 @@ const EventsPage = () => {
 
 </div>
 
-				<div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-					<label
-						htmlFor="event-search"
-						className="sr-only"
-					>
-						Search events
-					</label>
+				<div className="mb-8 rounded-2xl border border-zinc-800 bg-[#111113] p-4">
+					<div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+						<div className="lg:flex-1">
+							<label
+								htmlFor="event-search"
+								className="sr-only"
+							>
+								Search events
+							</label>
 
-					<input
-						id="event-search"
-						type="search"
-						value={searchInput}
-						onChange={(e) =>
-							setSearchInput(e.target.value)
-						}
-						placeholder="Search by title or location"
-						className="w-full rounded-xl border border-zinc-700 bg-[#09090B] px-4 py-3 text-white outline-none transition-all duration-200 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10 md:max-w-sm"
-					/>
+							<input
+								id="event-search"
+								type="search"
+								value={searchInput}
+								onChange={(e) =>
+									setSearchInput(e.target.value)
+								}
+								placeholder="Search by title or location"
+								className="w-full rounded-xl border border-zinc-800 bg-[#09090B] px-4 py-3 text-sm text-white outline-none transition-all duration-200 placeholder:text-zinc-600 hover:border-violet-500/30 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10"
+							/>
+						</div>
 
-					<label
-						htmlFor="event-category"
-						className="sr-only"
-					>
-						Filter by category
-					</label>
+						<div className="grid grid-cols-2 gap-3 lg:w-auto lg:grid-cols-2">
+							<div className="lg:w-44">
+								<label
+									htmlFor="event-category"
+									className="sr-only"
+								>
+									Filter by category
+								</label>
 
-					<select
-						id="event-category"
-						value={category}
-						onChange={(e) => {
-							setLoading(true);
+								<Select
+									id="event-category"
+									value={category}
+									onChange={(e) => {
+										setLoading(true);
 
-							setPage(1);
+										setPage(1);
 
-							setCategory(e.target.value);
-						}}
-						className="w-full rounded-xl border border-zinc-700 bg-[#09090B] px-4 py-3 text-white outline-none transition-all duration-200 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10 md:w-auto"
-					>
-						<option value="">All categories</option>
+										setCategory(e.target.value);
+									}}
+									options={[
+										{ value: "", label: "All categories" },
+										...EVENT_CATEGORIES.map((c) => ({
+											value: c,
+											label: c,
+										})),
+									]}
+								/>
+							</div>
 
-						{EVENT_CATEGORIES.map((option) => (
-							<option key={option} value={option}>
-								{option}
-							</option>
-						))}
-					</select>
+							<div className="lg:w-48">
+								<label
+									htmlFor="event-sort"
+									className="sr-only"
+								>
+									Sort events
+								</label>
 
-					<p className="text-sm text-zinc-500">
-						{loading
-							? "Loading events"
-							: failed
-								? "Events unavailable"
-								: `${totalEvents} Event${totalEvents !== 1 ? "s" : ""} Available`}
-					</p>
+								<Select
+									id="event-sort"
+									value={sort}
+									onChange={(e) => {
+										setLoading(true);
+
+										setPage(1);
+
+										setSort(e.target.value);
+									}}
+									options={[
+										{ value: "newest", label: "Newest first" },
+										{ value: "upcoming", label: "Upcoming first" },
+										{ value: "priceLow", label: "Price: low to high" },
+										{ value: "priceHigh", label: "Price: high to low" },
+									]}
+								/>
+							</div>
+						</div>
+					</div>
+
+					<div className="mt-3 flex items-center justify-between border-t border-zinc-800 pt-3">
+						<p className="text-sm text-zinc-500">
+							{loading
+								? "Loading events"
+								: failed
+									? "Events unavailable"
+									: `${totalEvents} Event${totalEvents !== 1 ? "s" : ""} Available`}
+						</p>
+
+						{(search || category) && !loading && (
+							<button
+								onClick={() => {
+									setLoading(true);
+
+									setSearchInput("");
+
+									setCategory("");
+
+									setPage(1);
+								}}
+								className="text-sm text-violet-400 transition-colors duration-200 hover:text-violet-300"
+							>
+								Clear filters
+							</button>
+						)}
+					</div>
 				</div>
 
 				{loading ? (

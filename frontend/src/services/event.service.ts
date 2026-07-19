@@ -21,6 +21,7 @@ export interface EventQuery {
 	limit?: number;
 	search?: string;
 	category?: string;
+	sort?: string;
 }
 
 class EventService {
