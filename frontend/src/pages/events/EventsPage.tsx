@@ -11,6 +11,8 @@ import EmptyState from "../../components/EmptyState";
 import ErrorState from "../../components/ErrorState";
 import Skeleton from "../../components/Skeleton";
 
+import { EVENT_CATEGORIES } from "../../utils/categories";
+
 const EventsPage = () => {
 	const [events, setEvents] = useState<Event[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -19,6 +21,7 @@ const EventsPage = () => {
 	const [searchInput, setSearchInput] = useState("");
 	const [search, setSearch] = useState("");
 	const [page, setPage] = useState(1);
+	const [category, setCategory] = useState("");
 
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalEvents, setTotalEvents] = useState(0);
@@ -52,6 +55,7 @@ const EventsPage = () => {
 					await eventService.getEvents({
 						page,
 						search: search || undefined,
+						category: category || undefined,
 					});
 
 				if (!active) return;
@@ -87,7 +91,7 @@ const EventsPage = () => {
 		return () => {
 			active = false;
 		};
-	}, [page, search, reloadToken]);
+	}, [page, search, category, reloadToken]);
 
 	const handleRetry = () => {
 		setLoading(true);
@@ -144,6 +148,34 @@ const EventsPage = () => {
 						className="w-full rounded-xl border border-zinc-700 bg-[#09090B] px-4 py-3 text-white outline-none transition-all duration-200 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10 md:max-w-sm"
 					/>
 
+					<label
+						htmlFor="event-category"
+						className="sr-only"
+					>
+						Filter by category
+					</label>
+
+					<select
+						id="event-category"
+						value={category}
+						onChange={(e) => {
+							setLoading(true);
+
+							setPage(1);
+
+							setCategory(e.target.value);
+						}}
+						className="w-full rounded-xl border border-zinc-700 bg-[#09090B] px-4 py-3 text-white outline-none transition-all duration-200 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10 md:w-auto"
+					>
+						<option value="">All categories</option>
+
+						{EVENT_CATEGORIES.map((option) => (
+							<option key={option} value={option}>
+								{option}
+							</option>
+						))}
+					</select>
+
 					<p className="text-sm text-zinc-500">
 						{loading
 							? "Loading events"
@@ -170,9 +202,9 @@ const EventsPage = () => {
 					/>
 				) : events.length === 0 ? (
 					<EmptyState
-						icon={search ? "🔍" : "🎭"}
+						icon={search || category ? "🔍" : "🎭"}
 						title={
-							search
+							search || category
 								? "No matching events"
 								: "No events available"
 						}
