@@ -11,6 +11,7 @@ import redis from "../config/redis";
 
 import ApiError from "../utils/ApiError";
 import asyncHandler from "../utils/asyncHandler";
+import { escapeRegex } from "../utils/escapeRegex";
 import {
 	bumpCacheVersion,
 	getCacheVersion,
@@ -69,25 +70,41 @@ export const getAllEvents = asyncHandler(
 		const limit = Math.min(50, Number(req.query.limit) || 10);
 		const skip = (page - 1) * limit;
 
-		const { location, date } = req.query;
+		const { location, date, search } = req.query;
 
 		const filter: any = {};
 
 		if (location && typeof location === "string") {
-			const search = location
-				.slice(0, 100)
-				.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+			filter.location = {
+				$regex: escapeRegex(location),
+				$options: "i",
+			};
+		}
 
-			filter.location = { $regex: search, $options: "i" };
+		if (search && typeof search === "string") {
+			const term = escapeRegex(search);
+
+			filter.$or = [
+				{ title: { $regex: term, $options: "i" } },
+				{ location: { $regex: term, $options: "i" } },
+			];
 		}
 
 		if (date && typeof date === "string") {
-			filter.date = new Date(date);
+			const from = new Date(date);
+
+			if (!Number.isNaN(from.getTime())) {
+				const to = new Date(from);
+
+				to.setDate(to.getDate() + 1);
+
+				filter.date = { $gte: from, $lt: to };
+			}
 		}
 
 		const version = await getCacheVersion("events");
 
-		const cacheKey = `events:${version}:${page}:${limit}:${location || "all"}:${date || "all"}`;
+		const cacheKey = `events:${version}:${page}:${limit}:${location || "all"}:${date || "all"}:${search || "all"}`;
 
 		const cached = await redis.get(cacheKey);
 
