@@ -25,21 +25,33 @@ const EventDetailsPage = () => {
 	const [bookingLoading, setBookingLoading] = useState(false);
 
 	useEffect(() => {
+		let active = true;
+
 		const fetchEvent = async () => {
 			try {
 				if (!id) return;
 
+				setLoading(true);
+
 				const response = await eventService.getEventById(id);
+
+				if (!active) return;
 
 				setEvent(response.data);
 			} catch (error) {
 				console.error(error);
 			} finally {
-				setLoading(false);
+				if (active) {
+					setLoading(false);
+				}
 			}
 		};
 
 		fetchEvent();
+
+		return () => {
+			active = false;
+		};
 	}, [id]);
 
 	const handleBooking = async () => {
