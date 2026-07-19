@@ -225,6 +225,13 @@ const MyBookingsPage = () => {
 												{booking.status}
 											</p>
 
+											<Link
+												to={`/bookings/${booking._id}/ticket`}
+												className="mt-3 mr-2 inline-flex rounded-lg border border-zinc-800 bg-[#111113] px-4 py-2 text-sm text-zinc-300 transition-all duration-200 hover:border-violet-500/30 hover:text-white"
+											>
+												View Ticket
+											</Link>
+
 											{booking.status === "active" &&
 												(confirmingId === booking._id ? (
 													<div className="mt-3 flex items-center gap-2">

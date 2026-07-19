@@ -9,6 +9,7 @@ export interface BookingEvent {
 
 export interface Booking {
 	_id: string;
+	reference?: string;
 
 	event: BookingEvent;
 

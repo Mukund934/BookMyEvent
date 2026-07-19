@@ -21,6 +21,9 @@ const EventDetailsPage = lazy(
 const MyBookingsPage = lazy(
 	() => import("./pages/bookings/MyBookingsPage")
 );
+const TicketPage = lazy(
+	() => import("./pages/bookings/TicketPage")
+);
 const DashboardPage = lazy(
 	() => import("./pages/dashboard/DashboardPage")
 );
@@ -100,6 +103,15 @@ function App() {
 		element={
 			<ProtectedRoute>
 				<EditEventPage />
+			</ProtectedRoute>
+		}
+	/>
+
+	<Route
+		path="/bookings/:id/ticket"
+		element={
+			<ProtectedRoute>
+				<TicketPage />
 			</ProtectedRoute>
 		}
 	/>
