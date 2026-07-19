@@ -4,6 +4,7 @@ import Layout from "../../components/Layout";
 import EmptyState from "../../components/EmptyState";
 import ErrorState from "../../components/ErrorState";
 import Skeleton from "../../components/Skeleton";
+import Card from "../../components/Card";
 
 import dashboardService from "../../services/dashboard.service";
 import { Link } from "react-router-dom";
@@ -138,117 +139,48 @@ const DashboardPage = () => {
 				</div>
 
 				<div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-					<div
-						className="
-		group
-		rounded-2xl
-		border
-		border-zinc-800
-		bg-[#111113]
-		p-6
-		transition-all
-		duration-200
-		hover:-translate-y-1
-		hover:border-violet-500/20
-		hover:shadow-lg
-		hover:shadow-violet-500/5
-	"
-					>
-						<p className="text-sm text-zinc-500">
-		Total Revenue
-	</p>
+					{[
+						{
+							label: "Total Revenue",
+							value: formatCurrency(data.totalRevenue),
+							hint: "Revenue generated",
+							tone: "text-green-300",
+						},
+						{
+							label: "Total Bookings",
+							value: data.totalBookings,
+							hint: "Booking activity",
+							tone: "text-violet-300",
+						},
+						{
+							label: "Cancelled",
+							value: data.cancelledBookings,
+							hint: "Cancelled reservations",
+							tone: "text-red-300",
+						},
+						{
+							label: "Cancellation Rate",
+							value: `${data.cancellationRate}%`,
+							hint: "Share of bookings cancelled",
+							tone: "text-zinc-500",
+						},
+					].map((stat) => (
+						<Card key={stat.label} interactive className="p-6">
+							<p className="text-sm text-zinc-500">
+								{stat.label}
+							</p>
 
-	<h2 className="mt-3 text-5xl font-bold tracking-tight text-white">
-		{formatCurrency(data.totalRevenue)}
-	</h2>
+							<h2 className="mt-3 text-4xl font-bold tracking-tight text-white">
+								{stat.value}
+							</h2>
 
-	<p className="mt-3 text-xs text-green-300">
-		↑ Revenue generated 
-	</p>
-					</div>
-
-					<div
-						className="
-		group
-		rounded-2xl
-		border
-		border-zinc-800
-		bg-[#111113]
-		p-6
-		transition-all
-		duration-200
-		hover:-translate-y-1
-		hover:border-violet-500/20
-		hover:shadow-lg
-		hover:shadow-violet-500/5
-	"
-					>
-						<p className="text-sm text-zinc-500">
-							Total Bookings 🎟
-						</p>
-
-						<h2 className="mt-3 text-5xl tracking-tight font-bold text-white">
-							{data.totalBookings}
-						</h2>
-                        <p className="mt-3 text-xs text-violet-300">
-	↑ Booking activity
-</p>
-					</div>
-
-					<div
-						className="
-		group
-		rounded-2xl
-		border
-		border-zinc-800
-		bg-[#111113]
-		p-6
-		transition-all
-		duration-200
-		hover:-translate-y-1
-		hover:border-violet-500/20
-		hover:shadow-lg
-		hover:shadow-violet-500/5
-	"
-					>
-						<p className="text-sm text-zinc-500">Cancelled ❌</p>
-
-						<h2 className="mt-3 text-5xl tracking-tight font-bold text-white">
-							{data.cancelledBookings}
-						</h2>
-                        <p className="mt-3 text-xs text-red-300">
-	↓ Cancelled reservations
-</p>
-					</div>
-
-					<div
-						className="
-		group
-		rounded-2xl
-		border
-		border-zinc-800
-		bg-[#111113]
-		p-6
-		transition-all
-		duration-200
-		hover:-translate-y-1
-		hover:border-violet-500/20
-		hover:shadow-lg
-		hover:shadow-violet-500/5
-	"
-					>
-						<p className="text-sm text-zinc-500">
-							Cancellation Rate 📉
-						</p>
-
-						<h2 className="mt-3 text-5xl tracking-tight font-bold text-white">
-							{data.cancellationRate}%
-						</h2>
-                        <p className="mt-3 text-xs text-zinc-500">
-	Updated in real time
-</p>
-					</div>
+							<p className={`mt-3 text-xs ${stat.tone}`}>
+								{stat.hint}
+							</p>
+						</Card>
+					))}
 				</div>
+
 				<div className="mt-10 rounded-2xl border border-zinc-800 bg-[#111113] p-6 transition-all duration-200 hover:border-zinc-700 hover:-translate-y-1">
 					<div className="mb-6 flex items-center justify-between">
 						<h2 className="text-2xl font-bold text-white">
