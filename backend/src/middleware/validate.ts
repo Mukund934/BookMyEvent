@@ -6,18 +6,30 @@ const validate =
   (schema: ZodSchema) =>
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      schema.parse({
+      const parsed: any = schema.parse({
         body: req.body,
         query: req.query,
         params: req.params,
       });
 
+      if (parsed?.body) {
+        req.body = parsed.body;
+      }
+
       next();
     } catch (err: any) {
-      const message =
-        err.errors?.[0]?.message || "Validation Error";
+      const issues = err.issues || [];
 
-      next(new ApiError(400, message, err.errors));
+      const message =
+        issues[0]?.message || "Validation Error";
+
+      next(
+        new ApiError(
+          400,
+          message,
+          issues.map((issue: any) => issue.message)
+        )
+      );
     }
   };
 
