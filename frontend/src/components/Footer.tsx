@@ -51,17 +51,26 @@ const Footer = () => {
 						</h4>
 
 						<div className="flex flex-col gap-3">
-							<span className="text-sm text-zinc-400">
+							<Link
+								to="/documentation"
+								className="text-sm text-zinc-400 transition hover:text-white"
+							>
 								Documentation
-							</span>
+							</Link>
 
-							<span className="text-sm text-zinc-400">
+							<Link
+								to="/help"
+								className="text-sm text-zinc-400 transition hover:text-white"
+							>
 								Help Center
-							</span>
+							</Link>
 
-							<span className="text-sm text-zinc-400">
+							<Link
+								to="/support"
+								className="text-sm text-zinc-400 transition hover:text-white"
+							>
 								Support
-							</span>
+							</Link>
 						</div>
 					</div>
 
@@ -71,17 +80,26 @@ const Footer = () => {
 						</h4>
 
 						<div className="flex flex-col gap-3">
-							<span className="text-sm text-zinc-400">
+							<Link
+								to="/privacy"
+								className="text-sm text-zinc-400 transition hover:text-white"
+							>
 								Privacy Policy
-							</span>
+							</Link>
 
-							<span className="text-sm text-zinc-400">
+							<Link
+								to="/terms"
+								className="text-sm text-zinc-400 transition hover:text-white"
+							>
 								Terms of Service
-							</span>
+							</Link>
 
-							<span className="text-sm text-zinc-400">
+							<Link
+								to="/cookies"
+								className="text-sm text-zinc-400 transition hover:text-white"
+							>
 								Cookies
-							</span>
+							</Link>
 						</div>
 					</div>
 				</div>

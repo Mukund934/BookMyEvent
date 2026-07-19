@@ -33,6 +33,18 @@ const CreateEventPage = lazy(
 const EditEventPage = lazy(
 	() => import("./pages/dashboard/EditEventPage")
 );
+const DocumentationPage = lazy(
+	() => import("./pages/resources/DocumentationPage")
+);
+const HelpCenterPage = lazy(
+	() => import("./pages/resources/HelpCenterPage")
+);
+const SupportPage = lazy(
+	() => import("./pages/resources/SupportPage")
+);
+const PrivacyPage = lazy(() => import("./pages/legal/PrivacyPage"));
+const TermsPage = lazy(() => import("./pages/legal/TermsPage"));
+const CookiesPage = lazy(() => import("./pages/legal/CookiesPage"));
 const NotFoundPage = lazy(() => import("./pages/notfound/NotFoundPage"));
 
 const RouteFallback = () => (
@@ -115,6 +127,18 @@ function App() {
 			</ProtectedRoute>
 		}
 	/>
+
+	<Route path="/documentation" element={<DocumentationPage />} />
+
+	<Route path="/help" element={<HelpCenterPage />} />
+
+	<Route path="/support" element={<SupportPage />} />
+
+	<Route path="/privacy" element={<PrivacyPage />} />
+
+	<Route path="/terms" element={<TermsPage />} />
+
+	<Route path="/cookies" element={<CookiesPage />} />
 
 	<Route path="*" element={<NotFoundPage />} />
 </Routes>
