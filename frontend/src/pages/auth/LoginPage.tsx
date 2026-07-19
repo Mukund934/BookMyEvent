@@ -1,4 +1,6 @@
 import { useState } from "react";
+
+import FormField from "../../components/FormField";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../../assets/BookMyEventLogo.webp";
 import { getErrorMessage } from "../../utils/error";
@@ -95,7 +97,7 @@ const LoginPage = () => {
 						</p>
 
 						<div className="space-y-4 text-zinc-300">
-							<p>✓ Secure JWT Authenticationn</p>
+							<p>✓ Secure JWT Authentication</p>
 							<p>✓ Create & Manage Events</p>
 							<p>✓ Smart Booking Management</p>
 							<p>✓ Analytics Dashboard</p>
@@ -118,73 +120,29 @@ const LoginPage = () => {
 								className="space-y-5"
 							>
 
-								<div>
-									<label className="mb-2 block text-sm text-zinc-300">
-										Email Address
-									</label>
+								<FormField
+									id="email"
+									name="email"
+									type="email"
+									label="Email Address"
+									placeholder="you@example.com"
+									autoComplete="email"
+									value={email}
+									onChange={(e) => setEmail(e.target.value)}
+									required
+								/>
 
-									<input
-										type="email"
-										value={email}
-										onChange={(e) =>
-											setEmail(
-												e.target.value
-											)
-										}
-										placeholder="you@example.com"
-										className="
-	w-full
-	rounded-xl
-	border
-	border-zinc-700
-	bg-[#09090B]
-	px-4
-	py-3
-	text-white
-	outline-none
-	transition-all
-	duration-200
-	hover:border-zinc-600
-	focus:border-violet-500
-	focus:shadow-lg
-	focus:shadow-violet-500/10
-"
-									/>
-								</div>
-
-								<div>
-									<label className="mb-2 block text-sm text-zinc-300">
-										Password
-									</label>
-
-									<input
-										type="password"
-										value={password}
-										onChange={(e) =>
-											setPassword(
-												e.target.value
-											)
-										}
-										placeholder="Enter password"
-										className="
-	w-full
-	rounded-xl
-	border
-	border-zinc-700
-	bg-[#09090B]
-	px-4
-	py-3
-	text-white
-	outline-none
-	transition-all
-	duration-200
-	hover:border-zinc-600
-	focus:border-violet-500
-	focus:shadow-lg
-	focus:shadow-violet-500/10
-"
-									/>
-								</div>
+								<FormField
+									id="password"
+									name="password"
+									type="password"
+									label="Password"
+									placeholder="Your password"
+									autoComplete="current-password"
+									value={password}
+									onChange={(e) => setPassword(e.target.value)}
+									required
+								/>
 
 								{error && (
 									<div

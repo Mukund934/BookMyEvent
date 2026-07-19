@@ -1,4 +1,6 @@
 import { useState } from "react";
+
+import FormField from "../../components/FormField";
 import { Link, useNavigate } from "react-router-dom";
 
 import authService from "../../services/auth.service";
@@ -128,117 +130,51 @@ const RegisterPage = () => {
 								className="space-y-5"
 							>
 
-								<input
+								<FormField
+									id="name"
+									name="name"
 									type="text"
+									label="Full Name"
+									placeholder="Your name"
 									autoComplete="name"
-									placeholder="Full Name"
 									value={name}
-									onChange={(e) =>
-										setName(e.target.value)
-									}
-									className="
-										w-full
-										rounded-xl
-										border
-										border-zinc-700
-										bg-[#09090B]
-										px-4
-										py-3
-										text-white
-										outline-none
-										transition-all
-										duration-200
-										hover:border-zinc-600
-										focus:border-violet-500
-										focus:shadow-lg
-										focus:shadow-violet-500/10
-									"
+									onChange={(e) => setName(e.target.value)}
 									required
 								/>
 
-								<input
+								<FormField
+									id="email"
+									name="email"
 									type="email"
+									label="Email Address"
+									placeholder="you@example.com"
 									autoComplete="email"
-									placeholder="Email Address"
 									value={email}
-									onChange={(e) =>
-										setEmail(e.target.value)
-									}
-									className="
-										w-full
-										rounded-xl
-										border
-										border-zinc-700
-										bg-[#09090B]
-										px-4
-										py-3
-										text-white
-										outline-none
-										transition-all
-										duration-200
-										hover:border-zinc-600
-										focus:border-violet-500
-										focus:shadow-lg
-										focus:shadow-violet-500/10
-									"
+									onChange={(e) => setEmail(e.target.value)}
 									required
 								/>
 
-								<input
+								<FormField
+									id="password"
+									name="password"
 									type="password"
+									label="Password"
+									placeholder="At least 8 characters"
 									autoComplete="new-password"
-									placeholder="Password"
 									value={password}
-									onChange={(e) =>
-										setPassword(e.target.value)
-									}
-									className="
-										w-full
-										rounded-xl
-										border
-										border-zinc-700
-										bg-[#09090B]
-										px-4
-										py-3
-										text-white
-										outline-none
-										transition-all
-										duration-200
-										hover:border-zinc-600
-										focus:border-violet-500
-										focus:shadow-lg
-										focus:shadow-violet-500/10
-									"
+									onChange={(e) => setPassword(e.target.value)}
 									required
 								/>
 
-								<input
+								<FormField
+									id="confirmPassword"
+									name="confirmPassword"
 									type="password"
+									label="Confirm Password"
+									placeholder="Repeat your password"
 									autoComplete="new-password"
-									placeholder="Confirm Password"
 									value={confirmPassword}
-									onChange={(e) =>
-										setConfirmPassword(
-											e.target.value
-										)
-									}
-									className="
-										w-full
-										rounded-xl
-										border
-										border-zinc-700
-										bg-[#09090B]
-										px-4
-										py-3
-										text-white
-										outline-none
-										transition-all
-										duration-200
-										hover:border-zinc-600
-										focus:border-violet-500
-										focus:shadow-lg
-										focus:shadow-violet-500/10
-									"
+									onChange={(e) => setConfirmPassword(e.target.value)}
 									required
 								/>
 
