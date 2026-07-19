@@ -74,7 +74,11 @@ export const getAllEvents = asyncHandler(
 		const filter: any = {};
 
 		if (location && typeof location === "string") {
-			filter.location = { $regex: location, $options: "i" };
+			const search = location
+				.slice(0, 100)
+				.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+			filter.location = { $regex: search, $options: "i" };
 		}
 
 		if (date && typeof date === "string") {
