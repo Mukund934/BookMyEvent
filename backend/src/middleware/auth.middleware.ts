@@ -35,6 +35,7 @@ export const protect = (
 		const decoded = jwt.verify(
 			token,
 			process.env.JWT_SECRET as string,
+			{ algorithms: ["HS256"] },
 		) as jwt.JwtPayload;
 
 		req.user = {
