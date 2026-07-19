@@ -1,14 +1,24 @@
-import mongoose from "mongoose";
+import mongoose, { Document, Schema, Types } from "mongoose";
 
-const bookingSchema = new mongoose.Schema(
+export interface IBooking extends Document {
+	user: Types.ObjectId;
+	event: Types.ObjectId;
+	seatsBooked: number;
+	totalAmount: number;
+	status: "active" | "cancelled";
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+const bookingSchema = new Schema<IBooking>(
 	{
 		user: {
-			type: mongoose.Schema.Types.ObjectId,
+			type: Schema.Types.ObjectId,
 			ref: "User",
 			required: true,
 		},
 		event: {
-			type: mongoose.Schema.Types.ObjectId,
+			type: Schema.Types.ObjectId,
 			ref: "Event",
 			required: true,
 		},
@@ -43,4 +53,4 @@ bookingSchema.index(
 	},
 );
 
-export default mongoose.model("Booking", bookingSchema);
+export default mongoose.model<IBooking>("Booking", bookingSchema);
