@@ -1,6 +1,7 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
 
 export interface IBooking extends Document {
+	reference: string;
 	user: Types.ObjectId;
 	event: Types.ObjectId;
 	seatsBooked: number;
@@ -12,6 +13,11 @@ export interface IBooking extends Document {
 
 const bookingSchema = new Schema<IBooking>(
 	{
+		reference: {
+			type: String,
+			required: true,
+			unique: true,
+		},
 		user: {
 			type: Schema.Types.ObjectId,
 			ref: "User",

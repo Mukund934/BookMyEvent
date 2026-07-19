@@ -8,6 +8,7 @@ import redis from "../config/redis";
 
 import ApiError from "../utils/ApiError";
 import asyncHandler from "../utils/asyncHandler";
+import { generateBookingReference } from "../utils/bookingReference";
 import {
 	bumpCacheVersion,
 	getCacheVersion,
@@ -66,6 +67,7 @@ export const bookEvent = asyncHandler(
 			booking = await Booking.create(
 				[
 					{
+						reference: generateBookingReference(),
 						user: req.user.userId,
 						event: eventId,
 						seatsBooked: seats,
