@@ -234,74 +234,75 @@ export const getDashboardOverview = asyncHandler(
 			req.user.userId,
 		);
 
-		const topEvents = await Booking.aggregate([
-			...basePipeline(req.user.userId),
-			{
-				$group: {
-					_id: "$event._id",
-					title: { $first: "$event.title" },
-					revenue: { $sum: "$totalAmount" },
-					bookings: { $sum: 1 },
-				},
-			},
-			{ $sort: { revenue: -1 } },
-			{ $limit: 5 },
-		]);
-
-		const monthlyTrends = await Booking.aggregate([
-			...basePipeline(req.user.userId),
-			{
-				$group: {
-					_id: {
-						year: { $year: "$createdAt" },
-						month: { $month: "$createdAt" },
+		const [topEvents, monthlyTrends, organizerEvents] =
+			await Promise.all([
+				Booking.aggregate([
+					...basePipeline(req.user.userId),
+					{
+						$group: {
+							_id: "$event._id",
+							title: { $first: "$event.title" },
+							revenue: { $sum: "$totalAmount" },
+							bookings: { $sum: 1 },
+						},
 					},
-					totalBookings: { $sum: 1 },
-					revenue: { $sum: "$totalAmount" },
-				},
-			},
-			{
-				$sort: {
-					"_id.year": 1,
-					"_id.month": 1,
-				},
-			},
-		]);
-
-		const organizerEvents = await Event.find({
-			organizer: organizerId,
-		}).select("_id");
+					{ $sort: { revenue: -1 } },
+					{ $limit: 5 },
+				]),
+				Booking.aggregate([
+					...basePipeline(req.user.userId),
+					{
+						$group: {
+							_id: {
+								year: { $year: "$createdAt" },
+								month: { $month: "$createdAt" },
+							},
+							totalBookings: { $sum: 1 },
+							revenue: { $sum: "$totalAmount" },
+						},
+					},
+					{
+						$sort: {
+							"_id.year": 1,
+							"_id.month": 1,
+						},
+					},
+				]),
+				Event.find({
+					organizer: organizerId,
+				}).select("_id"),
+			]);
 
 		const eventIds = organizerEvents.map(
 			(event) => event._id,
 		);
 
-		const totalBookings = await Booking.countDocuments({
-			event: { $in: eventIds },
-		});
-
-		const cancelledBookings =
-			await Booking.countDocuments({
-				event: { $in: eventIds },
-				status: "cancelled",
-			});
-
-		const revenueResult = await Booking.aggregate([
-			{
-				$match: {
+		const [totalBookings, cancelledBookings, revenueResult] =
+			await Promise.all([
+				Booking.countDocuments({
 					event: { $in: eventIds },
-					status: "active",
-				},
-			},
-			{
-				$group: {
-					_id: null,
-					totalRevenue: {
-						$sum: "$totalAmount",
+				}),
+				Booking.countDocuments({
+					event: { $in: eventIds },
+					status: "cancelled",
+				}),
+				Booking.aggregate([
+					{
+						$match: {
+							event: { $in: eventIds },
+							status: "active",
+						},
 					},
-				},
-			},
-		]);
+					{
+						$group: {
+							_id: null,
+							totalRevenue: {
+								$sum: "$totalAmount",
+							},
+						},
+					},
+				]),
+			]);
 
 		const totalRevenue =
 			revenueResult[0]?.totalRevenue || 0;
