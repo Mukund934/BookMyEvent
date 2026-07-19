@@ -1,3 +1,9 @@
+export interface Organizer {
+	_id: string;
+	name: string;
+	email: string;
+}
+
 export interface Event {
 	_id: string;
 	title: string;
@@ -7,7 +13,7 @@ export interface Event {
 	price: number;
 	totalSeats: number;
 	availableSeats: number;
-	organizer: string;
+	organizer: string | Organizer;
 	createdAt: string;
 	updatedAt: string;
 }

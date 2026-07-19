@@ -166,6 +166,15 @@ const EventDetailsPage = () => {
 		);
 	}
 
+	const organizer =
+		typeof event.organizer === "string"
+			? null
+			: event.organizer;
+
+	const organizerName = organizer?.name || "Event Organizer";
+
+	const organizerEmail = organizer?.email || "";
+
 	const totalPrice = event.price * tickets;
 
 	return (
@@ -347,17 +356,19 @@ const EventDetailsPage = () => {
 
 								<div className="flex items-center gap-4">
 									<div className="flex h-14 w-14 items-center justify-center rounded-full bg-violet-600 text-lg font-bold">
-										O
+										{organizerName.charAt(0).toUpperCase()}
 									</div>
 
 									<div>
 										<h3 className="font-semibold">
-											Event Organizer
+											{organizerName}
 										</h3>
 
-										<p className="text-sm text-zinc-400">
-											Verified Event Organizer
-										</p>
+										{organizerEmail && (
+											<p className="text-sm text-zinc-400">
+												{organizerEmail}
+											</p>
+										)}
 									</div>
 								</div>
 							</div>
