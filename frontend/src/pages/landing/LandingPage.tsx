@@ -131,22 +131,12 @@ hover:shadow-violet-500/20
 									Explore Events
 								</Link>
 
-								<button className="
-rounded-xl
-border
-border-zinc-700
-px-7
-py-3.5
-font-medium
-text-zinc-300
-transition-all
-duration-200
-hover:border-violet-500/20
-hover:bg-[#111113]
-hover:text-white
-">
-									View Demo
-								</button>
+								<Link
+									to="/register"
+									className="rounded-xl border border-zinc-700 px-7 py-3.5 font-medium text-zinc-300 transition-all duration-200 hover:border-violet-500/20 hover:bg-[#111113] hover:text-white"
+								>
+									Create an Account
+								</Link>
 							</div>
 						</div>
 					</div>

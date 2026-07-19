@@ -196,31 +196,14 @@ const LoginPage = () => {
 								)}
 
 								<div className="flex items-center justify-between text-sm">
-									<label className="flex items-center gap-3 text-sm text-zinc-400 cursor-pointer">
+									<span />
 
-	<input
-		type="checkbox"
-		className="
-			h-4
-			w-4
-			rounded
-			border-zinc-600
-			bg-[#09090B]
-			text-violet-600
-			focus:ring-violet-500
-		"
-	/>
-
-	<span>Remember Me</span>
-
-</label>
-
-									<button
-										type="button"
+									<Link
+										to="/forgot-password"
 										className="text-violet-400 hover:text-violet-300"
 									>
 										Forgot Password?
-									</button>
+									</Link>
 								</div>
 
 								<button
