@@ -8,6 +8,10 @@ import redis from "../config/redis";
 
 import ApiError from "../utils/ApiError";
 import asyncHandler from "../utils/asyncHandler";
+import {
+	bumpCacheVersion,
+	getCacheVersion,
+} from "../utils/cacheVersion";
 
 export const bookEvent = asyncHandler(
 	async (req: AuthRequest, res: Response) => {
@@ -83,22 +87,15 @@ export const bookEvent = asyncHandler(
 			session.endSession();
 		}
 
-		const keys = await redis.keys(`bookings:user:${req.user.userId}:*`);
+		await bumpCacheVersion(`bookings:${req.user.userId}`);
 
-		if (keys.length) {
-			await redis.del(...keys);
-		}
 		await redis.del(`analytics:${eventId}`);
 
 		await redis.del(`event:${eventId}`);
 
-		const eventKeys = await redis.keys("events:*");
+		await bumpCacheVersion("events");
 
-		if (eventKeys.length) {
-			await redis.del(...eventKeys);
-		}
-
-		await redis.del(`dashboard:overview:${event.organizer}`);
+		await bumpCacheVersion(`dashboard:${event.organizer}`);
 
 		res.status(201).json({
 			success: true,
@@ -114,7 +111,13 @@ export const getMyBookings = asyncHandler(
 			throw new ApiError(401, "Unauthorized");
 		}
 
-		const cacheKey = `bookings:user:${req.user.userId}:p:${req.query.page || 1}`;
+		const version = await getCacheVersion(
+			`bookings:${req.user.userId}`,
+		);
+
+		const { page, limit, skip } = getPagination(req.query as any);
+
+		const cacheKey = `bookings:user:${req.user.userId}:${version}:p:${page}:l:${limit}`;
 
 		//  cache check
 		const cached = await redis.get(cacheKey);
@@ -126,8 +129,6 @@ export const getMyBookings = asyncHandler(
 				...JSON.parse(cached),
 			});
 		}
-
-		const { page, limit, skip } = getPagination(req.query as any);
 
 		const bookings = await Booking.find({
 			user: req.user.userId,
@@ -215,25 +216,18 @@ export const cancelBooking = asyncHandler(
 			session.endSession();
 		}
 
-		const keys = await redis.keys(`bookings:user:${req.user.userId}:*`);
+		await bumpCacheVersion(`bookings:${req.user.userId}`);
 
-		if (keys.length) {
-			await redis.del(...keys);
-		}
 		await redis.del(`analytics:${booking.event}`);
 
 		await redis.del(`event:${booking.event}`);
 
-		const eventKeys = await redis.keys("events:*");
-
-		if (eventKeys.length) {
-			await redis.del(...eventKeys);
-		}
+		await bumpCacheVersion("events");
 
 		const eventDoc = await Event.findById(booking.event);
 
 		if (eventDoc) {
-			await redis.del(`dashboard:overview:${eventDoc.organizer}`);
+			await bumpCacheVersion(`dashboard:${eventDoc.organizer}`);
 		}
 
 		res.status(200).json({

@@ -55,11 +55,11 @@ const redis = {
         }
     },
 
-    keys: async (pattern: string): Promise<string[]> => {
+    incr: async (key: string): Promise<void> => {
         try {
-            return await client.keys(pattern);
+            await client.incr(key);
         } catch {
-            return [];
+            return;
         }
     },
 };

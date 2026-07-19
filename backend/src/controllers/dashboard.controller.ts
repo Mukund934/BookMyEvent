@@ -8,6 +8,7 @@ import redis from "../config/redis";
 
 import ApiError from "../utils/ApiError";
 import asyncHandler from "../utils/asyncHandler";
+import { getCacheVersion } from "../utils/cacheVersion";
 
 import Event from "../models/Event";
 
@@ -35,7 +36,11 @@ export const getTopEventsByRevenue = asyncHandler(
 	async (req: AuthRequest, res: Response) => {
 		if (!req.user) throw new ApiError(401, "Unauthorized");
 
-		const cacheKey = `dashboard:topEvents:${req.user.userId}`;
+		const version = await getCacheVersion(
+			`dashboard:${req.user.userId}`,
+		);
+
+		const cacheKey = `dashboard:topEvents:${req.user.userId}:${version}`;
 
 		const cached = await redis.get(cacheKey);
 		if (cached) {
@@ -74,7 +79,11 @@ export const getMonthlyBookingTrends = asyncHandler(
 	async (req: AuthRequest, res: Response) => {
 		if (!req.user) throw new ApiError(401, "Unauthorized");
 
-		const cacheKey = `dashboard:trends:${req.user.userId}`;
+		const version = await getCacheVersion(
+			`dashboard:${req.user.userId}`,
+		);
+
+		const cacheKey = `dashboard:trends:${req.user.userId}:${version}`;
 
 		const cached = await redis.get(cacheKey);
 		if (cached) {
@@ -114,7 +123,11 @@ export const getCancellationStats = asyncHandler(
 	async (req: AuthRequest, res: Response) => {
 		if (!req.user) throw new ApiError(401, "Unauthorized");
 
-		const cacheKey = `dashboard:cancellations:${req.user.userId}`;
+		const version = await getCacheVersion(
+			`dashboard:${req.user.userId}`,
+		);
+
+		const cacheKey = `dashboard:cancellations:${req.user.userId}:${version}`;
 
 		const cached = await redis.get(cacheKey);
 		if (cached) {
@@ -149,7 +162,11 @@ export const getLocationHeatmap = asyncHandler(
 	async (req: AuthRequest, res: Response) => {
 		if (!req.user) throw new ApiError(401, "Unauthorized");
 
-		const cacheKey = `dashboard:heatmap:${req.user.userId}`;
+		const version = await getCacheVersion(
+			`dashboard:${req.user.userId}`,
+		);
+
+		const cacheKey = `dashboard:heatmap:${req.user.userId}:${version}`;
 
 		const cached = await redis.get(cacheKey);
 		if (cached) {
@@ -189,7 +206,11 @@ export const getDashboardOverview = asyncHandler(
 			throw new ApiError(401, "Unauthorized");
 		}
 
-		const cacheKey = `dashboard:overview:${req.user.userId}`;
+		const version = await getCacheVersion(
+			`dashboard:${req.user.userId}`,
+		);
+
+		const cacheKey = `dashboard:overview:${req.user.userId}:${version}`;
 
 		const cached = await redis.get(cacheKey);
 

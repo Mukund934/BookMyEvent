@@ -11,6 +11,10 @@ import redis from "../config/redis";
 
 import ApiError from "../utils/ApiError";
 import asyncHandler from "../utils/asyncHandler";
+import {
+	bumpCacheVersion,
+	getCacheVersion,
+} from "../utils/cacheVersion";
 
 export const createEvent = asyncHandler(
 	async (req: AuthRequest, res: Response) => {
@@ -47,13 +51,9 @@ export const createEvent = asyncHandler(
 			organizer: req.user.userId,
 		});
 
-		const eventKeys = await redis.keys("events:*");
+		await bumpCacheVersion("events");
 
-		if (eventKeys.length) {
-			await redis.del(...eventKeys);
-		}
-
-		await redis.del(`dashboard:overview:${req.user.userId}`);
+		await bumpCacheVersion(`dashboard:${req.user.userId}`);
 
 		res.status(201).json({
 			success: true,
@@ -85,7 +85,9 @@ export const getAllEvents = asyncHandler(
 			filter.date = new Date(date);
 		}
 
-		const cacheKey = `events:${page}:${limit}:${location || "all"}:${date || "all"}`;
+		const version = await getCacheVersion("events");
+
+		const cacheKey = `events:${version}:${page}:${limit}:${location || "all"}:${date || "all"}`;
 
 		const cached = await redis.get(cacheKey);
 
