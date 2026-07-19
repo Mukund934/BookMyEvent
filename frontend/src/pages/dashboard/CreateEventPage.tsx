@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Layout from "../../components/Layout";
+import FormField from "../../components/FormField";
 import eventService from "../../services/event.service";
 
 import { toast } from "sonner";
@@ -124,151 +125,73 @@ const CreateEventPage = () => {
 	hover:border-violet-500/20
 "
 				>
-                    
-					<input
+					<FormField
+						id="title"
 						name="title"
-						required
-						placeholder="Event Title"
+						label="Event Title"
+						placeholder="Summer Music Festival"
 						value={formData.title}
 						onChange={handleChange}
-						className="
-	w-full
-	rounded-xl
-	border
-	border-zinc-700
-	bg-[#09090B]
-	p-3
-	text-white
-	outline-none
-	transition-all
-	duration-200
-	focus:border-violet-500
-	focus:ring-2
-	focus:ring-violet-500/10
-"
+						required
 					/>
 
-					<textarea
+					<FormField
+						id="description"
 						name="description"
-						required
-						placeholder="Description"
+						label="Description"
+						placeholder="Tell attendees what to expect"
 						value={formData.description}
 						onChange={handleChange}
+						multiline
 						rows={4}
-						className="
-	w-full
-	rounded-xl
-	border
-	border-zinc-700
-	bg-[#09090B]
-	p-3
-	text-white
-	outline-none
-	transition-all
-	duration-200
-	focus:border-violet-500
-	focus:ring-2
-	focus:ring-violet-500/10
-"
+						required
 					/>
 
-					<input
-						type="datetime-local"
+					<FormField
+						id="date"
 						name="date"
-						required
+						label="Date and Time"
+						type="datetime-local"
 						value={formData.date}
 						onChange={handleChange}
-						className="
-	w-full
-	rounded-xl
-	border
-	border-zinc-700
-	bg-[#09090B]
-	p-3
-	text-white
-	outline-none
-	transition-all
-	duration-200
-	focus:border-violet-500
-	focus:ring-2
-	focus:ring-violet-500/10
-"
+						required
 					/>
 
-					<input
+					<FormField
+						id="location"
 						name="location"
-						required
-						placeholder="Location"
+						label="Location"
+						placeholder="Raipur"
 						value={formData.location}
 						onChange={handleChange}
-						className="
-	w-full
-	rounded-xl
-	border
-	border-zinc-700
-	bg-[#09090B]
-	p-3
-	text-white
-	outline-none
-	transition-all
-	duration-200
-	focus:border-violet-500
-	focus:ring-2
-	focus:ring-violet-500/10
-"
+						required
 					/>
 
-                    <div className="grid gap-5 md:grid-cols-2">
-					<input
-						type="number"
-						name="price"
-						required
-						min="0"
-						placeholder="Price"
-						value={formData.price}
-						onChange={handleChange}
-						className="
-	w-full
-	rounded-xl
-	border
-	border-zinc-700
-	bg-[#09090B]
-	p-3
-	text-white
-	outline-none
-	transition-all
-	duration-200
-	focus:border-violet-500
-	focus:ring-2
-	focus:ring-violet-500/10
-"
-					/>
+					<div className="grid gap-5 md:grid-cols-2">
+						<FormField
+							id="price"
+							name="price"
+							label="Price"
+							type="number"
+							min="0"
+							placeholder="499"
+							value={formData.price}
+							onChange={handleChange}
+							required
+						/>
 
-					<input
-						type="number"
-						name="totalSeats"
-						required
-						min="1"
-						placeholder="Total Seats"
-						value={formData.totalSeats}
-						onChange={handleChange}
-						className="
-	w-full
-	rounded-xl
-	border
-	border-zinc-700
-	bg-[#09090B]
-	p-3
-	text-white
-	outline-none
-	transition-all
-	duration-200
-	focus:border-violet-500
-	focus:ring-2
-	focus:ring-violet-500/10
-"
-					/>
-                    </div>
+						<FormField
+							id="totalSeats"
+							name="totalSeats"
+							label="Total Seats"
+							type="number"
+							min="1"
+							placeholder="100"
+							value={formData.totalSeats}
+							onChange={handleChange}
+							required
+						/>
+					</div>
 
 					<button
 						type="submit"
