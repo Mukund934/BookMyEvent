@@ -55,6 +55,8 @@ const EventDetailsPage = () => {
 	}, [id]);
 
 	const handleBooking = async () => {
+		if (bookingLoading) return;
+
 		try {
 			const token = localStorage.getItem("bookmyevent_token");
 
@@ -364,6 +366,8 @@ const EventDetailsPage = () => {
 													Math.max(1, tickets - 1),
 												)
 											}
+											disabled={tickets <= 1}
+											aria-label="Decrease tickets"
 											className="
 	flex
 	h-10
@@ -377,6 +381,8 @@ const EventDetailsPage = () => {
 	duration-200
 	hover:border-violet-500/30
 	hover:bg-violet-500/10
+	disabled:cursor-not-allowed
+	disabled:opacity-40
 "
 										>
 											-
@@ -388,8 +394,17 @@ const EventDetailsPage = () => {
 
 										<button
 											onClick={() =>
-												setTickets(tickets + 1)
+												setTickets(
+													Math.min(
+														event.availableSeats,
+														tickets + 1,
+													),
+												)
 											}
+											disabled={
+												tickets >= event.availableSeats
+											}
+											aria-label="Increase tickets"
 											className="
 	flex
 	h-10
@@ -403,6 +418,8 @@ const EventDetailsPage = () => {
 	duration-200
 	hover:border-violet-500/30
 	hover:bg-violet-500/10
+	disabled:cursor-not-allowed
+	disabled:opacity-40
 "
 										>
 											+
@@ -434,7 +451,10 @@ const EventDetailsPage = () => {
 
 								<button
 									onClick={handleBooking}
-									disabled={bookingLoading}
+									disabled={
+										bookingLoading ||
+										event.availableSeats < 1
+									}
 									className="
 	w-full
 	rounded-xl
@@ -452,9 +472,11 @@ const EventDetailsPage = () => {
 	disabled:opacity-50
 "
 								>
-									{bookingLoading
-										? "Booking..."
-										: "Book Seats"}
+									{event.availableSeats < 1
+										? "Sold Out"
+										: bookingLoading
+											? "Booking..."
+											: "Book Seats"}
 								</button>
 							</div>
 						</div>
