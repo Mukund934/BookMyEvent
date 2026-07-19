@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import logo from "../assets/BookMyEventLogo.png";
+import logo from "../assets/BookMyEventLogo.webp";
 
 const Navbar = () => {
 	const [menuOpen, setMenuOpen] =

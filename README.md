@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./frontend/src/assets/BookMyEventLogo.png" alt="BookMyEvent Logo" width="280"/>
+<img src="./docs/logo.png" alt="BookMyEvent Logo" width="280"/>
 
 
 A modern full-stack Event Booking Platform built with React, TypeScript, Node.js, Express, MongoDB, Redis, and JWT Authentication.
@@ -38,7 +38,7 @@ Designed as part of a Full Stack Developer Internship Assessment while focusing 
 ### 🏠 Landing Page
 
 <p align="center">
-  <img src="./frontend/public/home.png" width="90%" alt="Landing Page">
+  <img src="./docs/home.png" width="90%" alt="Landing Page">
 </p>
 
 ---
@@ -46,7 +46,7 @@ Designed as part of a Full Stack Developer Internship Assessment while focusing 
 ### 🎫 Discover Events
 
 <p align="center">
-  <img src="./frontend/public/events.png" width="90%" alt="Events Listing">
+  <img src="./docs/events.png" width="90%" alt="Events Listing">
 </p>
 
 ---
@@ -54,7 +54,7 @@ Designed as part of a Full Stack Developer Internship Assessment while focusing 
 ### 🎪 Event Details & Seat Availability
 
 <p align="center">
-  <img src="./frontend/public/insideOneEvent.png" width="90%" alt="Event Details">
+  <img src="./docs/insideOneEvent.png" width="90%" alt="Event Details">
 </p>
 
 ---
@@ -62,7 +62,7 @@ Designed as part of a Full Stack Developer Internship Assessment while focusing 
 ### 🛒 Booking Workflow
 
 <p align="center">
-  <img src="./frontend/public/insideOneEvent1.png" width="90%" alt="Booking Workflow">
+  <img src="./docs/insideOneEvent1.png" width="90%" alt="Booking Workflow">
 </p>
 
 ---
@@ -70,7 +70,7 @@ Designed as part of a Full Stack Developer Internship Assessment while focusing 
 ### 📊 Dashboard Analytics
 
 <p align="center">
-  <img src="./frontend/public/dashboard.png" width="90%" alt="Dashboard Analytics">
+  <img src="./docs/dashboard.png" width="90%" alt="Dashboard Analytics">
 </p>
 
 ---
@@ -78,7 +78,7 @@ Designed as part of a Full Stack Developer Internship Assessment while focusing 
 ### 📋 My Bookings
 
 <p align="center">
-  <img src="./frontend/public/myBookings.png" width="90%" alt="My Bookings">
+  <img src="./docs/myBookings.png" width="90%" alt="My Bookings">
 </p>
 
 ---

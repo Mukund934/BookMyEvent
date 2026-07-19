@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import authService from "../../services/auth.service";
-import logo from "../../assets/BookMyEventLogo.png";
+import logo from "../../assets/BookMyEventLogo.webp";
 import { getErrorMessage } from "../../utils/error";
 
 const RegisterPage = () => {
