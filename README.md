@@ -17,6 +17,8 @@
 ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=redis&logoColor=white)
 
+[![CI](https://github.com/Mukund934/BookMyEvent/actions/workflows/ci.yml/badge.svg)](https://github.com/Mukund934/BookMyEvent/actions/workflows/ci.yml)
+
 </div>
 
 ---
@@ -56,6 +58,7 @@ Everything else — search, categories, analytics, QR tickets — is built aroun
 - Graceful degradation: a Redis outage becomes a cache miss, not a 500
 - Route-level code splitting; the entry bundle is 87 kB gzipped
 - Rate limiting, request sanitisation, security headers and per-user authorisation on every mutating route
+- Booking invariants covered by tests running against a real MongoDB replica set, enforced in CI
 
 ---
 
@@ -259,8 +262,9 @@ Schema migrations run at boot from `config/migrations.ts` — idempotent backfil
 
 ## Roadmap
 
-- [ ] Automated tests around the booking concurrency path
-- [ ] CI running typecheck, lint and build on every push
+- [x] Automated tests around the booking concurrency path
+- [x] CI running typecheck, lint, build and tests on every push
+- [ ] Refresh screenshots to match the current UI
 - [ ] Organizer profile pages
 - [ ] Wishlist and recently viewed
 - [ ] Payment integration
@@ -285,7 +289,14 @@ Schema migrations run at boot from `config/migrations.ts` — idempotent backfil
 
 ## Contributing
 
-Issues and pull requests are welcome. Please run `npm run build` in both packages before opening a PR; the frontend must also pass `npx tsc -b` and `npx eslint .` cleanly.
+Issues and pull requests are welcome. CI runs typecheck, lint, build and the backend test suite on every push and pull request against `main`.
+
+```bash
+cd backend  && npm run build && npm test
+cd frontend && npx tsc -b && npx eslint . && npm run build
+```
+
+The booking tests spin up an in-memory MongoDB replica set, so the first run downloads a `mongod` binary.
 
 ## License
 
