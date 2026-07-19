@@ -10,6 +10,7 @@ import MyBookingsPage from "./pages/bookings/MyBookingsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardPage from "./pages/dashboard/DashboardPage";
 import CreateEventPage from "./pages/dashboard/CreateEventPage";
+import NotFoundPage from "./pages/notfound/NotFoundPage";
 
 function App() {
 	return (
@@ -54,6 +55,8 @@ function App() {
 			</ProtectedRoute>
 		}
 	/>
+
+	<Route path="*" element={<NotFoundPage />} />
 </Routes>
 		</BrowserRouter>
 	);
