@@ -8,6 +8,7 @@ import Layout from "../../components/Layout";
 
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { formatCurrency, formatDateTime, formatPrice } from "../../utils/format";
 
 import bookingService from "../../services/booking.service";
 
@@ -158,7 +159,7 @@ const EventDetailsPage = () => {
 
 								<span className="rounded-full border border-zinc-800 bg-[#111113]/70 px-4 py-2 text-sm text-zinc-300">
 									📅{" "}
-									{new Date(event.date).toLocaleDateString()}
+									{formatDateTime(event.date)}
 								</span>
 
 								<span className={
@@ -252,9 +253,7 @@ const EventDetailsPage = () => {
 										</p>
 
 										<p className="font-medium">
-											{new Date(
-												event.date,
-											).toLocaleDateString()}
+											{formatDateTime(event.date)}
 										</p>
 									</div>
 
@@ -350,7 +349,7 @@ const EventDetailsPage = () => {
 									</p>
 
 									<h2 className="text-4xl font-bold tracking-tight text-violet-400">
-										₹{event.price}
+										{formatPrice(event.price)}
 									</h2>
 								</div>
 
@@ -431,7 +430,7 @@ const EventDetailsPage = () => {
 									<div className="flex justify-between text-zinc-400">
 										<span>Price</span>
 
-										<span>₹{event.price}</span>
+										<span>{formatPrice(event.price)}</span>
 									</div>
 
 									<div className="flex justify-between text-zinc-400">
@@ -444,7 +443,7 @@ const EventDetailsPage = () => {
 										<span>Total</span>
 
 										<span className="text-violet-400">
-	₹{totalPrice}
+	{formatCurrency(totalPrice)}
 </span>
 									</div>
 								</div>

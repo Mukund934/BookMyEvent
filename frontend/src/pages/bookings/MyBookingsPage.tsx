@@ -6,6 +6,7 @@ import bookingService from "../../services/booking.service";
 import type { Booking } from "../../types/booking.types";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import { formatCurrency, formatDateTime } from "../../utils/format";
 
 const MyBookingsPage = () => {
 	const [bookings, setBookings] = useState<Booking[]>([]);
@@ -164,9 +165,7 @@ const MyBookingsPage = () => {
 
 										<p className="mt-1 text-zinc-400">
 											📅{" "}
-											{new Date(
-												booking.event.date,
-											).toLocaleDateString()}
+											{formatDateTime(booking.event.date)}
 										</p>
 									</div>
 
@@ -187,7 +186,7 @@ const MyBookingsPage = () => {
 											</p>
 
 											<p className="text-lg font-semibold text-violet-400">
-												₹{booking.totalAmount}
+												{formatCurrency(booking.totalAmount)}
 											</p>
 										</div>
 

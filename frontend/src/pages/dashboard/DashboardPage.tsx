@@ -4,6 +4,7 @@ import Layout from "../../components/Layout";
 
 import dashboardService from "../../services/dashboard.service";
 import { Link } from "react-router-dom";
+import { formatCurrency } from "../../utils/format";
 import type { DashboardOverview } from "../../types/dashboard.types";
 
 const DashboardPage = () => {
@@ -88,7 +89,7 @@ const DashboardPage = () => {
 	</p>
 
 	<h2 className="mt-3 text-5xl font-bold tracking-tight text-white">
-		₹{data.totalRevenue}
+		{formatCurrency(data.totalRevenue)}
 	</h2>
 
 	<p className="mt-3 text-xs text-green-300">
@@ -243,7 +244,7 @@ const DashboardPage = () => {
 
 									<div className="text-right">
 										<p className="font-semibold text-violet-400">
-											₹{event.revenue}
+											{formatCurrency(event.revenue)}
 										</p>
 
 										<p className="text-sm text-zinc-500">

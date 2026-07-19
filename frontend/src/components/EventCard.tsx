@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { formatDate, formatPrice } from "../utils/format";
 import type { Event } from "../types/event.types";
 
 interface Props {
@@ -27,7 +28,7 @@ const EventCard = ({ event }: Props) => {
 </span>
 
 				<span className="text-sm font-medium text-violet-400">
-	₹{event.price}
+	{formatPrice(event.price)}
 </span>
 			</div>
 
@@ -46,9 +47,7 @@ const EventCard = ({ event }: Props) => {
 
 				<p>
 					📅{" "}
-					{new Date(
-						event.date
-					).toLocaleDateString()}
+					{formatDate(event.date)}
 				</p>
 
 				<p>
