@@ -5,9 +5,13 @@ import eventService from "../../services/event.service";
 
 import type { Event } from "../../types/event.types";
 import Layout from "../../components/Layout";
+import EmptyState from "../../components/EmptyState";
+import ErrorState from "../../components/ErrorState";
+import Skeleton from "../../components/Skeleton";
 
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import type { AxiosError } from "axios";
 import { formatCurrency, formatDateTime, formatPrice } from "../../utils/format";
 
 import bookingService from "../../services/booking.service";
@@ -25,6 +29,10 @@ const EventDetailsPage = () => {
 
 	const [bookingLoading, setBookingLoading] = useState(false);
 
+	const [failed, setFailed] = useState(false);
+
+	const [reloadToken, setReloadToken] = useState(0);
+
 	useEffect(() => {
 		let active = true;
 
@@ -39,8 +47,16 @@ const EventDetailsPage = () => {
 				if (!active) return;
 
 				setEvent(response.data);
+
+				setFailed(false);
 			} catch (error) {
 				console.error(error);
+
+				if (active) {
+					setFailed(
+						(error as AxiosError)?.response?.status !== 404,
+					);
+				}
 			} finally {
 				if (active) {
 					setLoading(false);
@@ -53,7 +69,15 @@ const EventDetailsPage = () => {
 		return () => {
 			active = false;
 		};
-	}, [id]);
+	}, [id, reloadToken]);
+
+	const handleRetry = () => {
+		setLoading(true);
+
+		setFailed(false);
+
+		setReloadToken((token) => token + 1);
+	};
 
 	const handleBooking = async () => {
 		if (bookingLoading) return;
@@ -90,40 +114,51 @@ const EventDetailsPage = () => {
 
 	if (loading) {
 		return (
-			<div className="min-h-screen bg-[#09090B] text-white">
-				<div className="mx-auto max-w-7xl px-6 py-20">
-					<div className="flex items-center justify-center">
-	<div className="rounded-xl border border-zinc-800 bg-[#111113] px-6 py-4">
-		<p className="text-zinc-400">
-			Loading event details...
-		</p>
-	</div>
-</div>
+			<Layout>
+				<div className="mx-auto max-w-7xl px-6 py-14 md:py-20">
+					<Skeleton className="h-64 rounded-2xl" />
+
+					<div className="mt-8 grid gap-8 lg:grid-cols-[1.7fr_0.8fr]">
+						<Skeleton className="h-96 rounded-2xl" />
+
+						<Skeleton className="h-96 rounded-2xl" />
+					</div>
 				</div>
-			</div>
+			</Layout>
+		);
+	}
+
+	if (failed) {
+		return (
+			<Layout>
+				<div className="mx-auto max-w-7xl px-6 py-14 md:py-20">
+					<ErrorState
+						title="Could not load this event"
+						description="The event details are temporarily unavailable. Check your connection and try again."
+						onRetry={handleRetry}
+					/>
+				</div>
+			</Layout>
 		);
 	}
 
 	if (!event) {
 		return (
 			<Layout>
-				<div className="mx-auto max-w-7xl px-6 py-20">
-					<div className="rounded-2xl border border-zinc-800 bg-[#111113] p-10 text-center">
-						<h2 className="mb-3 text-2xl font-bold">
-							Event Not Found
-						</h2>
-
-						<p className="mb-6 text-zinc-400">
-							The event you are looking for does not exist.
-						</p>
-
-						<Link
-							to="/events"
-							className="rounded-xl bg-violet-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-violet-500"
-						>
-							Browse Events
-						</Link>
-					</div>
+				<div className="mx-auto max-w-7xl px-6 py-14 md:py-20">
+					<EmptyState
+						icon="🔍"
+						title="Event not found"
+						description="This event does not exist or is no longer published."
+						action={
+							<Link
+								to="/events"
+								className="inline-flex rounded-xl bg-violet-600 px-5 py-3 text-sm font-medium text-white transition-all duration-200 hover:bg-violet-500 hover:shadow-lg hover:shadow-violet-500/20"
+							>
+								Browse Events
+							</Link>
+						}
+					/>
 				</div>
 			</Layout>
 		);

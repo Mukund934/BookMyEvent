@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 
 import Layout from "../../components/Layout";
+import EmptyState from "../../components/EmptyState";
+import ErrorState from "../../components/ErrorState";
+import Skeleton from "../../components/Skeleton";
 import bookingService from "../../services/booking.service";
 
 import type { Booking } from "../../types/booking.types";
@@ -48,32 +51,63 @@ const MyBookingsPage = () => {
 		}
 	};
 
+	const [failed, setFailed] = useState(false);
+
+	const [reloadToken, setReloadToken] = useState(0);
+
 	useEffect(() => {
+		let active = true;
+
 		const fetchBookings = async () => {
 			try {
 				const response = await bookingService.getMyBookings();
 
+				if (!active) return;
+
 				setBookings(response.bookings);
+
+				setFailed(false);
 			} catch (error) {
 				console.error(error);
+
+				if (active) {
+					setFailed(true);
+				}
 			} finally {
-				setLoading(false);
+				if (active) {
+					setLoading(false);
+				}
 			}
 		};
 
 		fetchBookings();
-	}, []);
+
+		return () => {
+			active = false;
+		};
+	}, [reloadToken]);
+
+	const handleRetry = () => {
+		setLoading(true);
+
+		setFailed(false);
+
+		setReloadToken((token) => token + 1);
+	};
 
 	if (loading) {
 		return (
 			<Layout>
-				<div className="mx-auto max-w-7xl px-6 py-20">
-					<div className="flex items-center justify-center">
-						<div className="rounded-xl border border-zinc-800 bg-[#111113] px-6 py-4">
-							<p className="text-zinc-400">
-								Loading your bookings...
-							</p>
-						</div>
+				<div className="mx-auto max-w-7xl px-6 py-14 md:py-20">
+					<Skeleton className="h-10 w-56" />
+
+					<div className="mt-12 space-y-6">
+						{[0, 1, 2].map((placeholder) => (
+							<Skeleton
+								key={placeholder}
+								className="h-40 rounded-2xl"
+							/>
+						))}
 					</div>
 				</div>
 			</Layout>
@@ -92,47 +126,32 @@ const MyBookingsPage = () => {
 						View, manage and cancel your event reservations.
 					</p>
 					<p className="mt-4 text-sm text-zinc-500">
-						{bookings.length} Booking
-						{bookings.length !== 1 ? "s" : ""} Found
+						{failed
+							? "Bookings unavailable"
+							: `${bookings.length} Booking${bookings.length !== 1 ? "s" : ""} Found`}
 					</p>
 				</div>
 
-				{bookings.length === 0 ? (
-					<div className="rounded-2xl border border-zinc-800 bg-[#111113] p-12 text-center">
-						<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-violet-500/10 text-3xl">
-							🎟️
-						</div>
-
-						<h2 className="text-xl font-semibold text-white">
-							No bookings yet
-						</h2>
-
-						<p className="mt-3 text-zinc-400">
-							Explore upcoming events and reserve your first seat.
-						</p>
-
-						<Link
-							to="/events"
-							className="
-		mt-6
-		inline-flex
-		rounded-xl
-		bg-violet-600
-		px-5
-		py-3
-		text-sm
-		font-medium
-		text-white
-		transition-all
-		duration-200
-		hover:bg-violet-500
-		hover:shadow-lg
-		hover:shadow-violet-500/20
-	"
-						>
-							Browse Events
-						</Link>
-					</div>
+				{failed ? (
+					<ErrorState
+						title="Could not load your bookings"
+						description="Your reservations are temporarily unavailable. Check your connection and try again."
+						onRetry={handleRetry}
+					/>
+				) : bookings.length === 0 ? (
+					<EmptyState
+						icon="🎟️"
+						title="No bookings yet"
+						description="Explore upcoming events and reserve your first seat."
+						action={
+							<Link
+								to="/events"
+								className="inline-flex rounded-xl bg-violet-600 px-5 py-3 text-sm font-medium text-white transition-all duration-200 hover:bg-violet-500 hover:shadow-lg hover:shadow-violet-500/20"
+							>
+								Browse Events
+							</Link>
+						}
+					/>
 				) : (
 					<div className="space-y-6">
 						{bookings.map((booking) => (
