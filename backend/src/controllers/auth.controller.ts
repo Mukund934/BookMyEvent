@@ -8,12 +8,21 @@ import User from "../models/User";
 import ApiError from "../utils/ApiError";
 import asyncHandler from "../utils/asyncHandler";
 
+const DUMMY_PASSWORD_HASH = bcrypt.hashSync("bookmyevent", 10);
+
 export const register = asyncHandler(
 	async (req: Request, res: Response) => {
 		const { name, email, password } = req.body;
 
 		if (!name || !email || !password) {
 			throw new ApiError(400, "All fields are required");
+		}
+
+		if (String(password).length < 8) {
+			throw new ApiError(
+				400,
+				"Password must be at least 8 characters",
+			);
 		}
 
 		const existingUser = await User.findOne({ email });
@@ -54,6 +63,8 @@ export const login = asyncHandler(
 		const user = await User.findOne({ email });
 
 		if (!user) {
+			await bcrypt.compare(password, DUMMY_PASSWORD_HASH);
+
 			throw new ApiError(401, "Invalid credentials");
 		}
 
