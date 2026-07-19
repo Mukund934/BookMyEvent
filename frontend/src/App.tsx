@@ -8,6 +8,12 @@ import Skeleton from "./components/Skeleton";
 
 const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
 const RegisterPage = lazy(() => import("./pages/auth/RegisterPage"));
+const ForgotPasswordPage = lazy(
+	() => import("./pages/auth/ForgotPasswordPage")
+);
+const ResetPasswordPage = lazy(
+	() => import("./pages/auth/ResetPasswordPage")
+);
 const EventsPage = lazy(() => import("./pages/events/EventsPage"));
 const EventDetailsPage = lazy(
 	() => import("./pages/events/EventDetailsPage")
@@ -44,6 +50,16 @@ function App() {
 	<Route path="/login" element={<LoginPage />} />
 
 	<Route path="/register" element={<RegisterPage />} />
+
+	<Route
+		path="/forgot-password"
+		element={<ForgotPasswordPage />}
+	/>
+
+	<Route
+		path="/reset-password"
+		element={<ResetPasswordPage />}
+	/>
 
 	<Route path="/events" element={<EventsPage />} />
 
