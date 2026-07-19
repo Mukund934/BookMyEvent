@@ -80,7 +80,7 @@ export const getAllEvents = asyncHandler(
 		const limit = Math.min(50, Number(req.query.limit) || 10);
 		const skip = (page - 1) * limit;
 
-		const { location, date, search, category } = req.query;
+		const { location, date, search, category, sort } = req.query;
 
 		const filter: any = {};
 
@@ -116,9 +116,21 @@ export const getAllEvents = asyncHandler(
 			}
 		}
 
+		const sortOptions: Record<string, Record<string, 1 | -1>> = {
+			newest: { createdAt: -1 },
+			upcoming: { date: 1 },
+			priceLow: { price: 1 },
+			priceHigh: { price: -1 },
+		};
+
+		const sortKey =
+			typeof sort === "string" && sortOptions[sort]
+				? sort
+				: "newest";
+
 		const version = await getCacheVersion("events");
 
-		const cacheKey = `events:${version}:${page}:${limit}:${location || "all"}:${date || "all"}:${search || "all"}:${category || "all"}`;
+		const cacheKey = `events:${version}:${page}:${limit}:${location || "all"}:${date || "all"}:${search || "all"}:${category || "all"}:${sortKey}`;
 
 		const cached = await redis.get(cacheKey);
 
@@ -131,7 +143,10 @@ export const getAllEvents = asyncHandler(
 		}
 
 		const [events, total] = await Promise.all([
-			Event.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+			Event.find(filter)
+				.sort(sortOptions[sortKey]!)
+				.skip(skip)
+				.limit(limit),
 			Event.countDocuments(filter),
 		]);
 

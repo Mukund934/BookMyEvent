@@ -4,6 +4,8 @@ import "./config/env";
 import app from "./app";
 import mongoose from "mongoose";
 
+import { runMigrations } from "./config/migrations";
+
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -19,8 +21,10 @@ if (!process.env.JWT_SECRET) {
 
 mongoose
 	.connect(MONGO_URI)
-	.then(() => {
+	.then(async () => {
 		console.log("MongoDB Connected Successfully");
+
+		await runMigrations();
 
 		app.listen(PORT, () => {
 			console.log(`Server running on port ${PORT}`);
