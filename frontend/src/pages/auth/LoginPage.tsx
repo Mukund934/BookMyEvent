@@ -245,16 +245,27 @@ const LoginPage = () => {
 
 							<div className="mt-8 rounded-xl border border-zinc-800 bg-[#09090B] p-4">
 	<p className="mb-2 text-xs uppercase tracking-wide text-zinc-500">
-		Test Account
+		Demo account
 	</p>
 
-	<p className="text-sm text-zinc-300">
-		Email: test2@gmail.com
+	<p className="text-sm text-zinc-400">
+		A shared, public account for trying the app. Anyone can sign in
+		with it, so treat anything you create as visible to others.
 	</p>
 
-	<p className="text-sm text-zinc-300">
-		Password: 12345678
-	</p>
+	<button
+		type="button"
+		onClick={() => {
+			setEmail("test2@gmail.com");
+
+			setPassword("12345678");
+
+			setError("");
+		}}
+		className="mt-3 inline-flex rounded-lg border border-zinc-800 bg-[#111113] px-4 py-2 text-sm text-zinc-300 transition-all duration-200 hover:border-violet-500/30 hover:text-white"
+	>
+		Fill demo credentials
+	</button>
 </div>
 
 						</div>
